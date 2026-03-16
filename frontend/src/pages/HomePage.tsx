@@ -76,22 +76,24 @@ export function HomePage() {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <CategoriesBar />
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10 p-4">
+      <div className="p-4">
         {loading ? (
-          Array.from({ length: 12 }).map((_, i) => (
-            <div key={i} className="animate-pulse">
-              <div className="aspect-video rounded-xl bg-gray-200" />
-              <div className="flex gap-3 mt-3">
-                <div className="w-9 h-9 rounded-full bg-gray-200" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 bg-gray-200 rounded w-full" />
-                  <div className="h-3 bg-gray-200 rounded w-2/3" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10">
+            {Array.from({ length: 12 }).map((_, i) => (
+              <div key={i} className="animate-pulse">
+                <div className="aspect-video rounded-xl bg-gray-200" />
+                <div className="flex gap-3 mt-3">
+                  <div className="w-9 h-9 rounded-full bg-gray-200" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-gray-200 rounded w-full" />
+                    <div className="h-3 bg-gray-200 rounded w-2/3" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+          </div>
         ) : videos.length === 0 ? (
-          <div className="col-span-full p-8 text-center text-gray-500">
+          <div className="p-8 text-center text-gray-500">
             <p className="mb-4">No videos loaded. Ensure Invidious is running with Companion.</p>
             <button
               onClick={loadVideos}
