@@ -73,6 +73,10 @@ Note the port in the output (e.g. `bore.pub:12345`).
 
 Open `http://bore.pub:PORT` in your browser and test playback.
 
+### 6. (Optional) Use invidious.popped.dev via Cloudflare Tunnel
+
+To serve at `https://invidious.popped.dev` instead of bore.pub, follow [docs/CLOUDFLARE_TUNNEL_SETUP.md](CLOUDFLARE_TUNNEL_SETUP.md). You can then stop bore.
+
 ---
 
 ## Quick Commands
