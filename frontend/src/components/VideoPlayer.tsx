@@ -22,17 +22,34 @@ function pickBestFormat(streams: FormatStream[]): FormatStream | null {
   return sorted[0] ?? candidates[0];
 }
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY_MS = 2500;
+
 export function VideoPlayer({ video, autoPlay }: VideoPlayerProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [error, setError] = useState<string | null>(null);
+  const [retryKey, setRetryKey] = useState(0);
 
   const formatStreams = video.formatStreams ?? [];
   const hlsUrl = video.hlsUrl;
 
   const format = pickBestFormat(formatStreams);
-  const videoUrl = format?.url
+  const baseUrl = format?.url
     ? `/latest_version?id=${video.videoId}&itag=${format.itag}`
     : null;
+  const videoUrl = baseUrl ? `${baseUrl}${retryKey > 0 ? `&_r=${retryKey}` : ''}` : null;
+
+  const handleError = () => {
+    if (retryKey < MAX_RETRIES) {
+      setError('Retrying...');
+      setTimeout(() => {
+        setError(null);
+        setRetryKey((k) => k + 1);
+      }, RETRY_DELAY_MS);
+    } else {
+      setError('Failed to load video');
+    }
+  };
 
   useEffect(() => {
     const el = videoRef.current;
@@ -41,6 +58,11 @@ export function VideoPlayer({ video, autoPlay }: VideoPlayerProps) {
       el.play().catch(() => {});
     }
   }, [autoPlay, video.videoId]);
+
+  useEffect(() => {
+    setError(null);
+    setRetryKey(0);
+  }, [video.videoId]);
 
   if (video.liveNow && hlsUrl) {
     return (
@@ -59,15 +81,16 @@ export function VideoPlayer({ video, autoPlay }: VideoPlayerProps) {
 
   if (videoUrl) {
     return (
-      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden">
+      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden relative">
         <video
+          key={retryKey}
           ref={videoRef}
           className="w-full h-full"
           controls
           autoPlay={autoPlay}
           playsInline
           src={videoUrl}
-          onError={() => setError('Failed to load video')}
+          onError={handleError}
         />
         {error && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/80 text-red-400">
