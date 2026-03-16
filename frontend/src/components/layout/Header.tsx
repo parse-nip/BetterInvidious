@@ -27,7 +27,11 @@ export function Header({ isOpen, toggleSidebar }: HeaderProps) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    api.getMe().then(setUser).catch(() => setUser(null));
+    const fetchUser = () => api.getMe().then(setUser).catch(() => setUser(null));
+    fetchUser();
+    const onFocus = () => fetchUser();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
   }, []);
 
   const handleSignOut = async () => {

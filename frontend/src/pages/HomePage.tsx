@@ -9,9 +9,12 @@ export function HomePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  const [feedLabel, setFeedLabel] = useState<'Recommended' | 'Trending' | null>(null);
+
   const loadVideos = () => {
     setLoading(true);
     setError(null);
+    setFeedLabel(null);
     const norm = (d: unknown): Video[] => Array.isArray(d) ? d : (d as { videos?: Video[] })?.videos ?? [];
     const fallback = () =>
       api.getTrending(undefined, 'Gaming').then((data) => {
@@ -22,8 +25,18 @@ export function HomePage() {
     // Try recommended first (auth required); fallback to trending/popular for guests or on error
     api
       .getRecommended()
-      .then((list) => (list.length > 0 ? list : fallback()))
-      .catch(() => fallback())
+      .then((list) => {
+        if (list.length > 0) {
+          setFeedLabel('Recommended');
+          return list;
+        }
+        setFeedLabel('Trending');
+        return fallback();
+      })
+      .catch(() => {
+        setFeedLabel('Trending');
+        return fallback();
+      })
       .then((list) => {
         setVideos(list);
         // Enrich videos missing authorThumbnails in background (avoids blocking initial display)
@@ -77,6 +90,13 @@ export function HomePage() {
   return (
     <div className="flex flex-col flex-1 min-h-0">
       <CategoriesBar />
+      {feedLabel && (
+        <div className="px-4 pt-2">
+          <span className="text-sm font-medium text-gray-500">
+            {feedLabel === 'Recommended' ? 'Recommended for you' : 'Trending'}
+          </span>
+        </div>
+      )}
       <div className="p-4">
         {loading ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10">
