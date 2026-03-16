@@ -32,7 +32,7 @@ export function Header({ isOpen, toggleSidebar }: HeaderProps) {
 
   return (
     <header className="flex items-center justify-between px-4 h-14 sticky top-0 bg-white z-50 border-b border-gray-200">
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 shrink-0">
         <button onClick={toggleSidebar} className="relative w-10 h-10 flex items-center justify-center hover:bg-gray-100 rounded-full">
           <div className="flex flex-col justify-between w-[18px] h-[12px] transform transition-all duration-300 origin-center">
             <div className={`bg-black h-[1.5px] w-full transform transition-all duration-300 origin-left ${isOpen ? 'rotate-[42deg] w-[16px]' : ''}`}></div>
@@ -51,8 +51,8 @@ export function Header({ isOpen, toggleSidebar }: HeaderProps) {
         </Link>
       </div>
 
-      <form onSubmit={handleSearch} className="flex items-center flex-1 max-w-[720px] ml-10 mr-4">
-        <div className="flex flex-1 items-center border border-gray-300 rounded-l-full px-4 py-0.5 bg-white shadow-inner focus-within:border-blue-500 ml-8">
+      <form onSubmit={handleSearch} className="absolute left-1/2 -translate-x-1/2 flex items-center w-full max-w-[640px] px-4">
+        <div className="flex flex-1 items-center border border-gray-300 rounded-l-full px-4 py-0.5 bg-white shadow-inner focus-within:border-blue-500">
           <span className="text-gray-400 hidden md:block mr-2"><SvgSearch /></span>
           <input
             type="text"
@@ -70,6 +70,7 @@ export function Header({ isOpen, toggleSidebar }: HeaderProps) {
         </button>
       </form>
 
+      <div className="w-[180px] shrink-0" aria-hidden="true" />
     </header>
   );
 }

@@ -113,9 +113,7 @@ export function Sidebar({ isOpen, onOverlayClick }: SidebarProps) {
             ))}
           </div>
           <div className="p-5 text-xs text-gray-500 font-medium">
-            <p className="mb-3">About Press Copyright Contact us Creators Advertise Developers</p>
-            <p className="mb-3">Terms Privacy Policy &amp; Safety How YouTube works Test new features</p>
-            <p className="text-gray-400 font-normal">© 2026 Google LLC</p>
+            <p className="mb-3">Terms · Privacy</p>
           </div>
         </div>
       </aside>

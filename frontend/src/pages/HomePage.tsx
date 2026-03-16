@@ -1,53 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
 import { api } from '../lib/api';
 import type { Video } from '../lib/api';
-import { getThumbnailUrl, getAuthorThumbnail, formatDuration, getViewCountDisplay } from '../lib/api';
 import { CategoriesBar } from '../components/CategoriesBar';
-
-function VideoCard({ video }: { video: Video }) {
-  const thumbUrl = getThumbnailUrl({ videoId: video.videoId, videoThumbnails: video.videoThumbnails });
-  const avatarUrl = getAuthorThumbnail(video);
-  const viewCountText = getViewCountDisplay(video);
-  const publishedText = video.publishedText ?? '';
-  const duration = video.lengthSeconds != null ? formatDuration(video.lengthSeconds) : '0:00';
-
-  return (
-    <Link to={`/watch?v=${video.videoId}`} className="flex flex-col gap-3 cursor-pointer group no-underline text-inherit">
-      <div className="relative aspect-video rounded-xl overflow-hidden">
-        <img
-          src={thumbUrl}
-          alt={video.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-          loading="lazy"
-        />
-        <div className="absolute bottom-1.5 right-1.5 bg-black/80 text-white text-xs font-medium px-1.5 py-0.5 rounded">
-          {duration}
-        </div>
-      </div>
-      <div className="flex gap-3 pr-6">
-        <Link to={`/channel/${video.authorId}`} onClick={(e) => e.stopPropagation()} className="shrink-0">
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={video.author} className="w-9 h-9 rounded-full object-cover mt-0.5 hover:opacity-80" loading="lazy" />
-          ) : (
-            <div className="w-9 h-9 rounded-full bg-gray-300 mt-0.5" />
-          )}
-        </Link>
-        <div className="flex flex-col">
-          <h3 className="text-base font-semibold line-clamp-2 leading-tight mb-1 group-hover:text-blue-600">
-            {video.title}
-          </h3>
-          <div className="text-sm text-gray-600 flex flex-col">
-            <Link to={`/channel/${video.authorId}`} className="hover:text-gray-900 no-underline text-inherit" onClick={(e) => e.stopPropagation()}>
-              {video.author}
-            </Link>
-            <span>{[viewCountText, publishedText].filter(Boolean).join(' • ') || '\u2014'}</span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-}
+import { VideoGrid } from '../components/VideoGrid';
 
 export function HomePage() {
   const [videos, setVideos] = useState<Video[]>([]);
@@ -68,6 +23,21 @@ export function HomePage() {
         return api.getPopular().then(norm);
       })
       .catch(() => api.getPopular().then(norm))
+      .then(async (list) => {
+        // Enrich videos missing authorThumbnails (Gaming browse / popular may omit them)
+        const enriched = await Promise.all(
+          list.map(async (v) => {
+            if (v.authorThumbnails?.length || !v.authorId) return v;
+            try {
+              const ch = await api.getChannel(v.authorId);
+              return { ...v, authorThumbnails: ch.authorThumbnails };
+            } catch {
+              return v;
+            }
+          })
+        );
+        return enriched;
+      })
       .then(setVideos)
       .catch((e) => setError(e?.message ?? String(e)))
       .finally(() => setLoading(false));
@@ -122,7 +92,7 @@ export function HomePage() {
             </button>
           </div>
         ) : (
-          videos.map((video) => <VideoCard key={video.videoId} video={video} />)
+          <VideoGrid videos={videos} />
         )}
       </div>
     </div>

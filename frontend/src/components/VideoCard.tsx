@@ -32,7 +32,7 @@ export function VideoCard({ video, showChannelAvatar = true }: VideoCardProps) {
           authorId ? (
             <Link to={`/channel/${authorId}`} onClick={(e) => e.stopPropagation()} className="shrink-0">
               {avatarUrl ? (
-                <img src={avatarUrl} alt={author} className="w-9 h-9 rounded-full object-cover mt-0.5 hover:opacity-80" loading="lazy" />
+                <img src={avatarUrl} alt={author} className="w-9 h-9 rounded-full object-cover mt-0.5 hover:opacity-80" loading="lazy" referrerPolicy="no-referrer" />
               ) : (
                 <div className="w-9 h-9 rounded-full bg-gray-300 mt-0.5" />
               )}

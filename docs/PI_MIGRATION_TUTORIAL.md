@@ -6,13 +6,15 @@ Complete step-by-step guide for running BetterInvidious entirely on your Pi. Wor
 
 ## Overview
 
-| What | Where |
-|------|-------|
-| Invidious (web app) | Pi |
-| PostgreSQL (database) | Pi |
-| Companion (video playback) | Pi |
-| tinyproxy (YouTube proxy) | Pi |
-| bore (tunnel to internet) | Pi |
+
+| What                       | Where |
+| -------------------------- | ----- |
+| Invidious (web app)        | Pi    |
+| PostgreSQL (database)      | Pi    |
+| Companion (video playback) | Pi    |
+| tinyproxy (YouTube proxy)  | Pi    |
+| bore (tunnel to internet)  | Pi    |
+
 
 **No Fly.io. No monthly costs.** Your Pi's residential IP handles YouTube.
 
@@ -28,7 +30,9 @@ Open PowerShell in the project folder:
 
 ```powershell
 cd C:\Users\rootbeer\Downloads\BetterInvidious
-.\scripts\build-react-ui.ps1
+git remote add origin https://github.com/parse-nip/BetterInvidious.git
+git branch -M main
+git push -u origin main
 ```
 
 This creates `invidious/assets/react/` with the frontend. **Required** — the Docker build will fail without it.
@@ -50,10 +54,12 @@ rsync -avz --exclude node_modules --exclude .git C:\Users\rootbeer\Downloads\Bet
 **Option C: Git (if you have a remote repo)**
 
 On the Pi:
+
 ```bash
 git clone https://github.com/YOUR_USERNAME/BetterInvidious.git ~/BetterInvidious
 cd ~/BetterInvidious
 ```
+
 Then build the React UI on the Pi (see Part 2.5) or transfer the built `assets/react/` folder.
 
 **Option D: Cloud storage (school → Pi)**
@@ -138,6 +144,7 @@ docker compose -f docker-compose.pi.yml up -d --build
 **First run:** The Invidious image build takes **45–90 minutes** on a Pi 4 (Crystal compilation). You can leave it running and disconnect — it will continue.
 
 **Check progress:**
+
 ```bash
 docker compose -f docker-compose.pi.yml logs -f
 ```
@@ -155,6 +162,7 @@ docker compose -f docker-compose.pi.yml ps
 You should see `invidious`, `companion`, and `invidious-db` all `Up`.
 
 **Test locally:**
+
 ```bash
 curl -s http://localhost:3000/api/v1/stats | head -5
 ```
@@ -172,6 +180,7 @@ bore local 3000 --to bore.pub
 ```
 
 You'll see something like:
+
 ```
 listening at bore.pub:12345
 ```
@@ -187,6 +196,7 @@ nohup bore local 3000 --to bore.pub > /tmp/bore.log 2>&1 &
 ```
 
 Check the log for the port:
+
 ```bash
 cat /tmp/bore.log
 ```
@@ -225,6 +235,7 @@ sudo systemctl start bore-web
 ```
 
 **Note:** Bore's port changes each time it restarts. Check the new URL with:
+
 ```bash
 journalctl -u bore-web -f
 ```
@@ -241,27 +252,33 @@ journalctl -u bore-web -f
 
 ## Quick Reference
 
-| Task | Command |
-|------|---------|
-| View logs | `docker compose -f docker-compose.pi.yml logs -f` |
-| Stop stack | `docker compose -f docker-compose.pi.yml down` |
-| Start stack | `docker compose -f docker-compose.pi.yml up -d` |
+
+| Task                  | Command                                                 |
+| --------------------- | ------------------------------------------------------- |
+| View logs             | `docker compose -f docker-compose.pi.yml logs -f`       |
+| Stop stack            | `docker compose -f docker-compose.pi.yml down`          |
+| Start stack           | `docker compose -f docker-compose.pi.yml up -d`         |
 | Rebuild after changes | `docker compose -f docker-compose.pi.yml up -d --build` |
-| Check bore port | `cat /tmp/bore.log` or `journalctl -u bore-web -n 20` |
+| Check bore port       | `cat /tmp/bore.log` or `journalctl -u bore-web -n 20`   |
+
 
 ---
 
 ## Troubleshooting
 
 ### Build fails: "assets/react not found"
+
 Run `.\scripts\build-react-ui.ps1` on your PC and transfer the project again, or build on Pi (Part 2.5).
 
 ### "Connection refused" to companion
+
 - Ensure tinyproxy is running: `sudo systemctl status tinyproxy`
 - Ensure it listens on 0.0.0.0:3128: `grep Listen /etc/tinyproxy/tinyproxy.conf`
 
 ### Out of memory during build
+
 Add swap:
+
 ```bash
 sudo sysctl vm.swappiness=60
 sudo fallocate -l 2G /swapfile
@@ -272,23 +289,54 @@ echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 ```
 
 ### Video playback fails
+
 - Check companion logs: `docker compose -f docker-compose.pi.yml logs companion`
 - Ensure PROXY is set in the companion (it's in docker-compose.pi.yml)
 - Ensure tinyproxy is running
 
 ### Can't reach bore.pub URL from school
+
 Some networks block bore.pub. Try from your phone on cellular, or use port forwarding at home instead.
 
 ---
 
 ## Summary Checklist
 
-- [ ] Built React UI on PC
-- [ ] Transferred project to Pi
-- [ ] Installed Docker on Pi
-- [ ] Installed and started tinyproxy
-- [ ] Installed bore
-- [ ] Ran `docker compose -f docker-compose.pi.yml up -d --build`
-- [ ] Waited for build (45–90 min)
-- [ ] Started bore tunnel
-- [ ] Opened http://bore.pub:PORT and tested playback
+- Built React UI on PC
+- Transferred project to Pi
+- Installed Docker on Pi
+- Installed and started tinyproxy
+- Installed bore
+- Ran `docker compose -f docker-compose.pi.yml up -d --build`
+- Waited for build (45–90 min)
+- Started bore tunnel
+- Opened [http://bore.pub:PORT](http://bore.pub:PORT) and tested playback
+
+
+
+
+
+# Clone
+
+git clone [https://github.com/parse-nip/BetterInvidious.git](https://github.com/YOUR_USERNAME/BetterInvidious.git) ~/BetterInvidious
+
+cd ~/BetterInvidious
+
+# Optional: run automated setup (Docker, tinyproxy, bore)
+
+chmod +x scripts/pi/[setup-pi.sh](http://setup-pi.sh)
+
+./scripts/pi/[setup-pi.sh](http://setup-pi.sh)
+
+# Log out and back in (or run: newgrp docker) so Docker works without sudo
+
+# Start the stack (first build: 45–90 min)
+
+cd ~/BetterInvidious/invidious
+
+docker compose -f docker-compose.pi.yml up -d --build
+
+# Watch build progress
+
+docker compose -f docker-compose.pi.yml logs -f
+
