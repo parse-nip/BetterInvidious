@@ -21,7 +21,7 @@ RUN tar -xzvf openssl-${OPENSSL_VERSION}.tar.gz
 RUN cd openssl-${OPENSSL_VERSION} && ./Configure --openssldir=/etc/ssl && make -j$(nproc)
 
 FROM dependabot-alpine AS builder
-RUN apk add --no-cache 'crystal=1.16.3-r0' shards \
+RUN apk add --no-cache git 'crystal=1.16.3-r0' shards \
         sqlite-static yaml-static yaml-dev \
         pcre2-static gc-static \
         libxml2-static zlib-static \
@@ -35,14 +35,17 @@ COPY ./shard.lock ./shard.lock
 RUN shards install --production
 
 COPY ./src/ ./src/
-# TODO: .git folder is required for building – this is destructive.
-# See definition of CURRENT_BRANCH, CURRENT_COMMIT and CURRENT_VERSION.
-COPY ./.git/ ./.git/
-
 # Required for fetching player dependencies
 COPY ./scripts/ ./scripts/
 COPY ./assets/ ./assets/
 COPY ./videojs-dependencies.yml ./videojs-dependencies.yml
+
+# .git required for Crystal build macros (CURRENT_BRANCH, CURRENT_COMMIT, CURRENT_VERSION).
+# When building from vendored repo without .git, create a minimal one.
+RUN if [ ! -d .git ]; then \
+  git init && git config user.email "build@local" && git config user.name "Build" && \
+  git add -A && git commit -m "BetterInvidious" --allow-empty; \
+fi
 
 RUN crystal spec --warnings all \
     --link-flags "-lxml2 -llzma"
