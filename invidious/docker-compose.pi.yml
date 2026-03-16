@@ -47,6 +47,8 @@ services:
       interval: 30s
       timeout: 5s
       retries: 2
+    volumes:
+      - ./assets/react:/invidious/assets/react:ro
 
   companion:
     image: quay.io/invidious/invidious-companion:latest
