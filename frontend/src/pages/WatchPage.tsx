@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { api } from '../lib/api';
+import { addToHistory } from '../lib/history';
 import type { Video } from '../lib/api';
 import { VideoPlayer } from '../components/VideoPlayer';
 import { formatViews, getAuthorThumbnail, getThumbnailUrl } from '../lib/api';
@@ -49,6 +50,12 @@ export function WatchPage() {
     setError(null);
     api.getVideo(videoId, true).then(setVideo).catch((e) => setError(e instanceof Error ? e.message : String(e))).finally(() => setLoading(false));
   }, [videoId]);
+
+  useEffect(() => {
+    if (videoId && video) {
+      addToHistory(videoId);
+    }
+  }, [videoId, video]);
 
   useEffect(() => {
     if (!videoId || loading || error) return;
@@ -183,7 +190,7 @@ export function WatchPage() {
             <div className="py-8 text-center text-gray-500">Loading comments...</div>
           ) : comments?.contentHtml ? (
             <div
-              className="comments prose prose-sm max-w-none [&_a]:text-blue-600 [&_a:hover]:underline [&_img]:rounded-full"
+              className="comments prose prose-sm max-w-none [&_a]:text-blue-600 [&_a:hover]:underline [&_img]:max-w-[48px] [&_img]:max-h-[48px] [&_img]:w-12 [&_img]:h-12 [&_img]:rounded-full [&_img]:object-cover"
               dangerouslySetInnerHTML={{ __html: comments.contentHtml }}
               onClick={(e) => {
                 if (commentsLoading) return;

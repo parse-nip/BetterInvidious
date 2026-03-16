@@ -18,15 +18,10 @@ const icons = {
 
 const mainLinks = [
   { icon: 'Home', label: 'Home', path: '/' },
-  { icon: 'Shorts', label: 'Shorts', path: '/feed/trending' },
-  { icon: 'Subscriptions', label: 'Subscriptions', path: '/feed/trending' },
 ];
 
 const youLinks = [
-  { icon: 'History', label: 'History', path: '/feed/trending' },
-  { icon: 'PlaySquare', label: 'Your videos', path: '/feed/trending' },
-  { icon: 'Clock', label: 'Watch later', path: '/feed/trending' },
-  { icon: 'ThumbsUp', label: 'Liked videos', path: '/feed/trending' },
+  { icon: 'History', label: 'History', path: '/feed/history' },
 ];
 
 const exploreLinks = [
@@ -84,7 +79,7 @@ export function Sidebar({ isOpen, onOverlayClick }: SidebarProps) {
           {mainLinks.map((link) => (
             <LinkItem key={link.label} link={link} mini />
           ))}
-          <Link to="/feed/trending" className={`flex flex-col items-center justify-center w-16 h-18 rounded-lg hover:bg-gray-100 py-4 ${location.pathname.includes('feed') ? 'bg-gray-100' : ''}`}>
+          <Link to="/feed/history" className={`flex flex-col items-center justify-center w-16 h-18 rounded-lg hover:bg-gray-100 py-4 ${location.pathname === '/feed/history' ? 'bg-gray-100' : ''}`}>
             <span className="mb-1">{icons.History()}</span>
             <span className="text-[10px] truncate w-full text-center">You</span>
           </Link>
@@ -98,7 +93,7 @@ export function Sidebar({ isOpen, onOverlayClick }: SidebarProps) {
             ))}
           </div>
           <div className="p-3 border-b border-gray-200">
-            <Link to="/feed/trending" className="w-full px-3 py-2 text-base font-semibold flex items-center hover:bg-gray-100 rounded-lg">
+            <Link to="/feed/history" className="w-full px-3 py-2 text-base font-semibold flex items-center hover:bg-gray-100 rounded-lg">
               You <span className="ml-2 text-xl leading-none">›</span>
             </Link>
             {youLinks.map((link) => (

@@ -2,44 +2,29 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
 import type { Video } from '../lib/api';
 import { VideoGrid } from '../components/VideoGrid';
+import { getHistoryIds } from '../lib/history';
 
 export function HistoryPage() {
   const [videos, setVideos] = useState<Video[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     setLoading(true);
-    setError(null);
-    api
-      .getHistory(1)
-      .then(async (ids) => {
-        if (!ids?.length) {
-          setVideos([]);
-          return;
-        }
-        const results = await Promise.allSettled(
-          ids.slice(0, 50).map((id) => api.getVideo(id))
-        );
+    const ids = getHistoryIds();
+    if (!ids.length) {
+      setVideos([]);
+      setLoading(false);
+      return;
+    }
+    Promise.allSettled(ids.slice(0, 50).map((id) => api.getVideo(id)))
+      .then((results) => {
         const loaded = results
           .filter((r): r is PromiseFulfilledResult<Video> => r.status === 'fulfilled')
           .map((r) => r.value);
         setVideos(loaded);
       })
-      .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);
-
-  if (error) {
-    return (
-      <div className="p-6">
-        <p className="text-red-400">Failed to load history: {error}</p>
-        <p className="text-[var(--yt-text-secondary)] mt-2">
-          You may need to <a href="/login" className="text-[var(--yt-accent)]">log in</a> to view your history.
-        </p>
-      </div>
-    );
-  }
 
   return (
     <div className="pt-4">
