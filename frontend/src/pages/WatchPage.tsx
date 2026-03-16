@@ -4,6 +4,7 @@ import { api } from '../lib/api';
 import { addToHistory } from '../lib/history';
 import type { Video } from '../lib/api';
 import { VideoPlayer } from '../components/VideoPlayer';
+import { CommentsSection } from '../components/CommentsSection';
 import { formatViews, getAuthorThumbnail, getThumbnailUrl } from '../lib/api';
 
 const SvgThumbsUp = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M1 21h4V9H1v12zm22-11c0-1.1-.9-2-2-2h-6.31l.95-4.57.03-.32c0-.41-.17-.79-.44-1.06L14.17 1 7.59 7.59C7.22 7.97 7 8.45 7 9v10c0 1.1.9 2 2 2h9c.83 0 1.54-.5 1.84-1.22l3.02-7.05c.09-.23.14-.47.14-.73v-2z" /></svg>;
@@ -37,8 +38,6 @@ export function WatchPage() {
   const [error, setError] = useState<string | null>(null);
   const [showMoreDesc, setShowMoreDesc] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
-  const [comments, setComments] = useState<{ contentHtml: string; commentCount?: number } | null>(null);
-  const [commentsLoading, setCommentsLoading] = useState(false);
 
   useEffect(() => {
     if (!videoId) {
@@ -57,16 +56,6 @@ export function WatchPage() {
     }
   }, [videoId, video]);
 
-  useEffect(() => {
-    if (!videoId || loading || error) return;
-    setComments(null);
-    setCommentsLoading(true);
-    api
-      .getComments(videoId)
-      .then((r) => setComments({ contentHtml: r.contentHtml, commentCount: r.commentCount }))
-      .catch(() => setComments({ contentHtml: '', commentCount: 0 }))
-      .finally(() => setCommentsLoading(false));
-  }, [videoId, loading, error]);
 
   const handleShare = () => {
     navigator.clipboard.writeText(window.location.href).then(() => {
@@ -177,46 +166,11 @@ export function WatchPage() {
             </button>
           )}
         </div>
-        <div className="mt-6">
-          <div className="flex items-center gap-8 mb-6">
-            <h2 className="text-xl font-bold">
-              Comments
-              {comments?.commentCount != null && comments.commentCount > 0 && (
-                <span className="font-normal text-gray-600 ml-2">({comments.commentCount.toLocaleString()})</span>
-              )}
-            </h2>
+        {!loading && !error && videoId && (
+          <div className="mt-6">
+            <CommentsSection videoId={videoId} />
           </div>
-          {commentsLoading ? (
-            <div className="py-8 text-center text-gray-500">Loading comments...</div>
-          ) : comments?.contentHtml ? (
-            <div
-              className="comments prose prose-sm max-w-none [&_a]:text-blue-600 [&_a:hover]:underline [&_img]:max-w-[48px] [&_img]:max-h-[48px] [&_img]:w-12 [&_img]:h-12 [&_img]:rounded-full [&_img]:object-cover"
-              dangerouslySetInnerHTML={{ __html: comments.contentHtml }}
-              onClick={(e) => {
-                if (commentsLoading) return;
-                const target = (e.target as HTMLElement).closest('[data-continuation]');
-                if (target) {
-                  e.preventDefault();
-                  const continuation = (target as HTMLElement).getAttribute('data-continuation');
-                  if (continuation && videoId) {
-                    setCommentsLoading(true);
-                    api
-                      .getComments(videoId, { continuation })
-                      .then((r) =>
-                        setComments((prev) => ({
-                          contentHtml: (prev?.contentHtml ?? '') + r.contentHtml,
-                          commentCount: prev?.commentCount ?? r.commentCount,
-                        }))
-                      )
-                      .finally(() => setCommentsLoading(false));
-                  }
-                }
-              }}
-            />
-          ) : (
-            <p className="text-gray-500 py-4">No comments available.</p>
-          )}
-        </div>
+        )}
       </div>
       <div className="w-full lg:w-[400px] flex flex-col gap-3">
         {recommended.slice(0, 10).map((v) => (

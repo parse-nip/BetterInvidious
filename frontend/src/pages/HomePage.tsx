@@ -23,22 +23,31 @@ export function HomePage() {
         return api.getPopular().then(norm);
       })
       .catch(() => api.getPopular().then(norm))
-      .then(async (list) => {
-        // Enrich videos missing authorThumbnails (Gaming browse / popular may omit them)
-        const enriched = await Promise.all(
-          list.map(async (v) => {
-            if (v.authorThumbnails?.length || !v.authorId) return v;
+      .then((list) => {
+        setVideos(list);
+        // Enrich videos missing authorThumbnails in background (avoids blocking initial display)
+        const needs = list.filter((v) => !v.authorThumbnails?.length && v.authorId);
+        if (needs.length === 0) return;
+        Promise.all(
+          needs.map(async (v) => {
             try {
-              const ch = await api.getChannel(v.authorId);
+              const ch = await api.getChannel(v.authorId!);
               return { ...v, authorThumbnails: ch.authorThumbnails };
             } catch {
               return v;
             }
           })
-        );
-        return enriched;
+        ).then((enriched) => {
+          setVideos((prev) => {
+            const next = [...prev];
+            enriched.forEach((e) => {
+              const i = next.findIndex((p) => p.videoId === e.videoId);
+              if (i >= 0) next[i] = e;
+            });
+            return next;
+          });
+        });
       })
-      .then(setVideos)
       .catch((e) => setError(e?.message ?? String(e)))
       .finally(() => setLoading(false));
   };

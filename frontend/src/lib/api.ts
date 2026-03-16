@@ -112,6 +112,33 @@ export interface AuthPreferences {
   [key: string]: unknown;
 }
 
+export interface CommentAuthorThumbnail {
+  url: string;
+  width: number;
+  height: number;
+}
+
+export interface Comment {
+  commentId: string;
+  author: string;
+  authorId: string;
+  authorUrl?: string;
+  authorThumbnails?: CommentAuthorThumbnail[];
+  contentHtml: string;
+  published?: number;
+  publishedText?: string;
+  likeCount?: number;
+  verified?: boolean;
+  replies?: { replyCount: number; continuation: string };
+}
+
+export interface CommentsJsonResponse {
+  commentCount?: number;
+  videoId?: string;
+  comments: Comment[];
+  continuation?: string;
+}
+
 async function fetchApi<T>(path: string, options?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
   const res = await fetch(url, {
@@ -148,6 +175,12 @@ export const api = {
     return fetchApi<{ contentHtml: string; commentCount?: number; continuation?: string }>(
       `/api/v1/comments/${videoId}?${params}`
     );
+  },
+  getCommentsJson: (videoId: string, options?: { continuation?: string; sortBy?: string }) => {
+    const params = new URLSearchParams({ format: 'json' });
+    if (options?.continuation) params.set('continuation', options.continuation);
+    if (options?.sortBy) params.set('sort_by', options.sortBy);
+    return fetchApi<CommentsJsonResponse>(`/api/v1/comments/${videoId}?${params}`);
   },
   search: (q: string, options?: { type?: string; region?: string }) => {
     const params = new URLSearchParams({ q });
