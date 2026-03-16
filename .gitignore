@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build outputs (optional - we commit invidious/assets/react for Pi)
+# frontend/dist/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+bore-err.txt
+bore-out.txt
+
+# Proxy/tunnel binaries (downloaded by scripts)
+cloudflared
+scripts/proxy-tools/bore*
+scripts/proxy-tools/cloudflared*
+scripts/proxy-tools/gost*
+
+# Env files (if any)
+.env
+.env.local
+.env.*.local

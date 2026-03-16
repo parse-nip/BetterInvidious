@@ -1,0 +1,227 @@
+<%
+  preferences = env.get("preferences").as(Preferences)
+  locale = preferences.locale
+  dark_mode = preferences.dark_mode
+%>
+<!DOCTYPE html>
+<html lang="<%= locale %>">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <%= yield_content "header" %>
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=<%= ASSET_COMMIT %>">
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=<%= ASSET_COMMIT %>">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=<%= ASSET_COMMIT %>">
+    <link rel="manifest" href="/site.webmanifest?v=<%= ASSET_COMMIT %>">
+    <link rel="mask-icon" href="/safari-pinned-tab.svg?v=<%= ASSET_COMMIT %>" color="#ff0000">
+    <meta name="msapplication-TileColor" content="#ff0000">
+    <meta name="theme-color" content="#0f0f0f">
+    <link title="popped.dev" type="application/opensearchdescription+xml" rel="search" href="/opensearch.xml">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="/css/pure-min.css?v=<%= ASSET_COMMIT %>">
+    <link rel="stylesheet" href="/css/grids-responsive-min.css?v=<%= ASSET_COMMIT %>">
+    <link rel="stylesheet" href="/css/ionicons.min.css?v=<%= ASSET_COMMIT %>">
+    <link rel="stylesheet" href="/css/default.css?v=<%= ASSET_COMMIT %>">
+    <link rel="stylesheet" href="/css/carousel.css?v=<%= ASSET_COMMIT %>">
+    <link rel="stylesheet" href="/css/youtube.css?v=<%= ASSET_COMMIT %>">
+    <script src="/js/_helpers.js?v=<%= ASSET_COMMIT %>"></script>
+</head>
+
+<body class="yt-layout <%= dark_mode.blank? ? "no" : dark_mode %>-theme">
+    <span style="display:none" id="dark_mode_pref"><%= dark_mode %></span>
+
+    <!-- YouTube-style header -->
+    <header class="yt-header">
+        <div class="yt-header-start">
+            <button type="button" class="yt-header-menu-btn" id="yt-sidebar-toggle" aria-label="<%= translate(locale, "toggle_theme") %>">
+                <svg class="yt-icon yt-icon-menu" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+                <svg class="yt-icon yt-icon-close" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="display:none;"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+            </button>
+            <a href="/" class="yt-header-logo"><span>popped</span>.dev</a>
+        </div>
+        <div class="yt-header-center">
+            <% if navbar_search %>
+                <form class="pure-form" action="/search" method="get" style="display:flex;flex:1;min-width:0;">
+                    <div class="yt-search-wrap">
+                        <input type="search" id="searchbox" name="q" placeholder="<%= translate(locale, "search") %>" value="<%= env.get?("search").try {|x| HTML.escape(x.as(String)) } %>" autocorrect="off" autocapitalize="none" spellcheck="false" style="width:100%;">
+                    </div>
+                    <button type="submit" class="yt-search-btn" aria-label="<%= translate(locale, "search") %>">
+                        <svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+                    </button>
+                </form>
+            <% end %>
+        </div>
+        <div class="yt-header-end">
+            <a id="toggle_theme" href="/toggle_theme?referer=<%= env.get?("current_page") %>" class="yt-header-icon" title="<%= translate(locale, "toggle_theme") %>">
+                <% if dark_mode == "dark" %><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1 .45 1 1s-.45 1-1 1H2c-.55 0-1-.45-1-1s.45-1 1-1zm18 0h2c.55 0 1 .45 1 1s-.45 1-1 1h-2c-.55 0-1-.45-1-1s.45-1 1-1zM6 4.77L6.77 4c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41L6.77 6.23c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41zM17.23 4l.77-.77c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41l-.77.77c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41zM17.23 20l.77.77c.39.39 1.02.39 1.41 0 .39-.39.39-1.02 0-1.41l-.77-.77c-.39-.39-1.02-.39-1.41 0-.39.39-.39 1.02 0 1.41zM6.77 20L6 20.77c-.39.39-1.02.39-1.41 0-.39-.39-.39-1.02 0-1.41l.77-.77c.39-.39 1.02-.39 1.41 0 .39.39.39 1.02 0 1.41zM12 2v2c.55 0 1 .45 1 1s-.45 1-1 1V6c-.55 0-1-.45-1-1s.45-1 1-1zm0 16v2c.55 0 1 .45 1 1s-.45 1-1 1v-2c-.55 0-1-.45-1-1s.45-1 1-1zM4 12H2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1s-.45-1-1-1zm16 0h-2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1s-.45-1-1-1z"/></svg><% else %><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 3c-4.97 0-9 4.03-9 9s4.03 9 9 9 9-4.03 9-9c0-.46-.04-.92-.1-1.36-.98 1.37-2.58 2.26-4.4 2.26-2.98 0-5.4-2.42-5.4-5.4 0-1.81.89-3.42 2.26-4.4-.44-.06-.9-.1-1.36-.1z"/></svg><% end %>
+            </a>
+            <% if env.get? "user" %>
+                <a id="notification_ticker" href="/feed/subscriptions" class="yt-header-icon" title="<%= translate(locale, "Subscriptions") %>">
+                    <% notification_count = env.get("user").as(Invidious::User).notifications.size %>
+                    <% if CONFIG.enable_user_notifications && notification_count > 0 %>
+                        <span id="notification_count" style="position:absolute;top:4px;right:4px;background:var(--yt-accent);color:#fff;font-size:10px;min-width:14px;height:14px;border-radius:7px;display:flex;align-items:center;justify-content:center;"> <%= notification_count %></span>
+                    <% end %>
+                    <svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+                </a>
+            <% end %>
+            <a href="/preferences?referer=<%= env.get?("current_page") %>" class="yt-header-icon" title="<%= translate(locale, "Preferences") %>">
+                <svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M19.14 12.94c.04-.31.06-.63.06-.94 0-.31-.02-.63-.06-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.04.31-.06.63-.06.94s.02.63.06.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.04.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/></svg>
+            </a>
+            <span class="yt-header-account">
+            <% if env.get? "user" %>
+                <% if env.get("preferences").as(Preferences).show_nick %>
+                    <span class="yt-header-icon" style="cursor:default;font-size:0.875rem;max-width:120px;overflow:hidden;text-overflow:ellipsis;"><%= HTML.escape(env.get("user").as(Invidious::User).email) %></span>
+                <% end %>
+                <form action="/signout?referer=<%= env.get?("current_page") %>" method="post" style="margin:0;">
+                    <input type="hidden" name="csrf_token" value="<%= HTML.escape(env.get?("csrf_token").try &.as(String) || "") %>">
+                    <button type="submit" class="yt-header-icon" title="<%= translate(locale, "Log out") %>" style="border:none;cursor:pointer;">
+                        <svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z"/></svg>
+                    </button>
+                </form>
+            <% elsif CONFIG.login_enabled %>
+                <a href="/login?referer=<%= env.get?("current_page") %>" class="yt-header-sign-in">
+                    <svg class="yt-icon" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+                    <%= translate(locale, "Log in") %>
+                </a>
+            <% end %>
+            </span>
+        </div>
+    </header>
+
+    <!-- Sidebar overlay (mobile) -->
+    <div class="yt-sidebar-overlay" id="yt-sidebar-overlay" aria-hidden="true"></div>
+
+    <!-- YouTube-style sidebar (Home, Subscriptions, Library, History, Watch later) -->
+    <aside class="yt-sidebar" id="yt-sidebar">
+        <div class="yt-sidebar-section">
+            <% is_home = env.request.path == "/" || env.request.path == "/feed/popular" || env.request.path.starts_with?("/feed/popular") %>
+            <a href="/" class="yt-sidebar-item <%= is_home ? "active" : "" %>"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg><%= translate(locale, "Home") %></a>
+            <a href="/feed/trending" class="yt-sidebar-item"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 23c-4.42 0-8-3.13-8-7 0-2.38 1.19-4.47 3-5.74V6c0-1.66 1.34-3 3-3s3 1.34 3 3v.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5V6c0-3.31-2.69-6-6-6S6 2.69 6 6v4.26C4.19 11.53 4 13.62 4 16c0 3.87 3.58 7 8 7s8-3.13 8-7c0-2.38-1.19-4.47-3-5.74V6c0-1.66-1.34-3-3-3s-3 1.34-3 3v4.26C6.81 11.53 6 13.62 6 16c0 3.87 3.58 7 8 7z"/></svg><%= translate(locale, "Trending") %></a>
+            <% if env.get? "user" %>
+                <a href="/feed/subscriptions" class="yt-sidebar-item"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20 8H4V6h16v2zm-2-6H6v2h12V2zm4 10v8c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2v-8c0-1.1.9-2 2-2h16c1.1 0 2 .9 2 2zm-6 4l-6-3.27v6.54L16 16z"/></svg><%= translate(locale, "Subscriptions") %></a>
+            <% end %>
+        </div>
+        <% if env.get? "user" %>
+            <div class="yt-sidebar-divider"></div>
+            <div class="yt-sidebar-section">
+                <a href="/feed/playlists" class="yt-sidebar-item"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg><%= translate(locale, "Library") %></a>
+                <a href="/feed/history" class="yt-sidebar-item"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><%= translate(locale, "History") %></a>
+                <a href="/feed/playlists" class="yt-sidebar-item"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg><%= translate(locale, "Watch later") %></a>
+            </div>
+        <% else %>
+            <div class="yt-sidebar-divider"></div>
+            <div class="yt-sidebar-section">
+                <a href="/login?referer=<%= env.get?("current_page") %>" class="yt-sidebar-item"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M4 6H2v14c0 1.1.9 2 2 2h14v-2H4V6zm16-4H8c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-8 12.5v-9l6 4.5-6 4.5z"/></svg><%= translate(locale, "Library") %></a>
+                <a href="/login?referer=<%= env.get?("current_page") %>" class="yt-sidebar-item"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><%= translate(locale, "History") %></a>
+                <a href="/login?referer=<%= env.get?("current_page") %>" class="yt-sidebar-item"><svg class="yt-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg><%= translate(locale, "Watch later") %></a>
+            </div>
+        <% end %>
+    </aside>
+
+    <div id="contents" class="yt-contents">
+        <% if CONFIG.banner %>
+            <div class="h-box">
+                <h3><%= CONFIG.banner %></h3>
+            </div>
+        <% end %>
+
+        <main class="yt-main">
+            <%= content %>
+
+        </main>
+
+            <footer>
+                <div class="pure-g">
+                    <div class="pure-u-1 pure-u-md-1-3">
+                        <span>
+                            <span class="material-icons" style="vertical-align:middle;font-size:1rem;">code</span>
+                        <% if CONFIG.modified_source_code_url %>
+                            <a href="https://github.com/iv-org/invidious"><%= translate(locale, "footer_original_source_code") %></a> /
+                            <a href="<%= CONFIG.modified_source_code_url %>"><%= translate(locale, "footer_modfied_source_code") %></a>
+                        <% else %>
+                            <a href="https://github.com/iv-org/invidious"><%= translate(locale, "footer_source_code") %></a>
+                        <% end %>
+                        </span>
+                        <span>
+                            <a href="/privacy"><%= translate(locale, "View privacy policy.") %></a>
+                        </span>
+                    </div>
+                    <div class="pure-u-1 pure-u-md-1-3">
+                        <span><a href="https://github.com/iv-org/invidious/blob/master/LICENSE"><%= translate(locale, "Released under the AGPLv3 on Github.") %></a></span>
+                        <span><a rel="jslicense" href="/licenses"><%= translate(locale, "View JavaScript license information.") %></a></span>
+                    </div>
+                    <div class="pure-u-1 pure-u-md-1-3">
+                        <span>popped.dev — <%= translate(locale, "Current version: ") %><%= CURRENT_VERSION %>-<%= CURRENT_COMMIT %></span>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+    </div>
+    <script>
+    (function(){
+        var sidebar = document.getElementById('yt-sidebar');
+        var overlay = document.getElementById('yt-sidebar-overlay');
+        var toggle = document.getElementById('yt-sidebar-toggle');
+        var iconMenu = toggle && toggle.querySelector('.yt-icon-menu');
+        var iconClose = toggle && toggle.querySelector('.yt-icon-close');
+        var body = document.body;
+        var STORAGE_KEY = 'yt-sidebar-open';
+        function isDesktop() { return window.matchMedia('(min-width:769px)').matches; }
+        function open() {
+            sidebar.classList.add('yt-sidebar-open');
+            overlay.classList.add('yt-sidebar-open');
+            overlay.setAttribute('aria-hidden','false');
+            body.classList.add('yt-sidebar-visible');
+            if (iconMenu) iconMenu.style.display = 'none';
+            if (iconClose) iconClose.style.display = 'block';
+            if (isDesktop()) try { localStorage.setItem(STORAGE_KEY, '1'); } catch(e){}
+        }
+        function close() {
+            sidebar.classList.remove('yt-sidebar-open');
+            overlay.classList.remove('yt-sidebar-open');
+            overlay.setAttribute('aria-hidden','true');
+            body.classList.remove('yt-sidebar-visible');
+            if (iconMenu) iconMenu.style.display = 'block';
+            if (iconClose) iconClose.style.display = 'none';
+            if (isDesktop()) try { localStorage.setItem(STORAGE_KEY, '0'); } catch(e){}
+        }
+        function toggleSidebar() {
+            sidebar.classList.contains('yt-sidebar-open') ? close() : open();
+        }
+        if (sidebar && overlay && toggle) {
+            toggle.addEventListener('click', toggleSidebar);
+            overlay.addEventListener('click', close);
+            if (isDesktop()) {
+                var saved = null;
+                try { saved = localStorage.getItem(STORAGE_KEY); } catch(e){}
+                if (saved === '0') { close(); } else { open(); }
+            } else {
+                body.classList.remove('yt-sidebar-visible');
+            }
+        }
+    })();
+    </script>
+    <script src="/js/handlers.js?v=<%= ASSET_COMMIT %>"></script>
+    <script src="/js/themes.js?v=<%= ASSET_COMMIT %>"></script>
+    <% if env.get? "user" %>
+        <script src="/js/sse.js?v=<%= ASSET_COMMIT %>"></script>
+        <script id="notification_data" type="application/json">
+        <%=
+        {
+            "upload_text" => HTML.escape(translate(locale, "`x` uploaded a video")),
+            "live_upload_text" => HTML.escape(translate(locale, "`x` is live"))
+        }.to_pretty_json
+        %>
+        </script>
+        <% if CONFIG.enable_user_notifications %>
+        <script src="/js/notifications.js?v=<%= ASSET_COMMIT %>"></script>
+        <% end %>
+    <% end %>
+</body>
+
+</html>

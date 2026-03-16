@@ -1,0 +1,214 @@
+import React, { useState } from 'react';
+import {
+Menu,
+Search,
+Home,
+PlaySquare,
+History,
+Moon,
+Bell,
+ThumbsUp,
+MessageSquare,
+Share2,
+MoreVertical,
+X,
+ChevronRight
+} from 'lucide-react';
+
+const RelatedVideo = ({ title, channel, views }) => (
+<div className="flex gap-3 group cursor-pointer">
+    <div className="relative shrink-0 w-40 aspect-video rounded-lg bg-[#272727] overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-800" />
+    </div>
+    <div className="flex flex-col min-w-0">
+        <h4
+            className="text-[14px] font-medium text-[#F1F1F1] line-clamp-2 leading-tight group-hover:text-white transition-colors">
+            {title}
+        </h4>
+        <p className="text-[12px] text-[#AAAAAA] mt-1">{channel}</p>
+        <p className="text-[12px] text-[#AAAAAA]">{views} views</p>
+    </div>
+</div>
+);
+
+export default function App() {
+const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+return (
+<div className="flex flex-col h-screen w-full bg-[#0F0F0F] text-[#F1F1F1] font-sans overflow-hidden">
+    {/* Header */}
+    <header className="h-14 px-4 flex items-center justify-between shrink-0 bg-[#0F0F0F] z-50 border-b border-white/5">
+        <div className="flex items-center gap-4">
+            <button onClick={toggleSidebar} className="p-2 hover:bg-[#272727] rounded-full transition-colors">
+                {isSidebarOpen ?
+                <X size={24} /> :
+                <Menu size={24} />}
+            </button>
+            <div className="flex items-center gap-0.5 cursor-pointer">
+                <span className="text-[18px] font-bold tracking-tight">popped</span>
+                <span className="text-[18px] font-bold text-[#FF0000]">.dev</span>
+            </div>
+        </div>
+
+        <div className="hidden md:flex flex-1 max-w-[720px] px-8">
+            <div className="flex w-full items-center">
+                <div
+                    className="flex-1 flex items-center bg-[#121212] border border-[#303030] rounded-l-full px-4 py-1.5 focus-within:border-blue-500">
+                    <input type="text" placeholder="Search"
+                        className="bg-transparent w-full outline-none text-white text-[16px]" />
+                </div>
+                <button
+                    className="bg-[#222222] border border-l-0 border-[#303030] px-5 py-[7.5px] rounded-r-full hover:bg-[#272727]">
+                    <Search size={20} className="text-gray-400" />
+                </button>
+            </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+            <button className="p-2 hover:bg-[#272727] rounded-full hidden sm:block">
+                <Moon size={22} />
+            </button>
+            <button className="p-2 hover:bg-[#272727] rounded-full hidden sm:block">
+                <Bell size={22} />
+            </button>
+            <div
+                className="w-8 h-8 flex items-center justify-center bg-purple-600 rounded-full text-sm font-medium ml-2 cursor-pointer ring-2 ring-transparent hover:ring-white/20 transition-all">
+                A
+            </div>
+        </div>
+    </header>
+
+    <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar */}
+        <aside className={`shrink-0 overflow-y-auto transition-all duration-300 ease-in-out border-r border-[#303030]/50
+            bg-[#0F0F0F] ${ isSidebarOpen ? 'w-60' : 'w-0 -translate-x-full' }`}>
+            <div className="w-60 p-3 flex flex-col gap-1">
+                <div className="flex items-center gap-5 px-3 py-2.5 rounded-xl bg-[#272727] cursor-pointer">
+                    <Home size={22} />
+                    <span className="text-[14px] font-medium">Home</span>
+                </div>
+                <div
+                    className="flex items-center gap-5 px-3 py-2.5 rounded-xl hover:bg-[#272727] transition-colors cursor-pointer">
+                    <PlaySquare size={22} />
+                    <span className="text-[14px] font-medium">Subscriptions</span>
+                </div>
+                <div
+                    className="flex items-center gap-5 px-3 py-2.5 rounded-xl hover:bg-[#272727] transition-colors cursor-pointer">
+                    <History size={22} />
+                    <span className="text-[14px] font-medium">History</span>
+                </div>
+            </div>
+        </aside>
+
+        {/* Watch Content */}
+        <main className="flex-1 flex flex-col lg:flex-row overflow-y-auto p-4 lg:p-6 gap-6 scroll-smooth">
+            {/* Main Video Section */}
+            <div className="flex-1 flex flex-col min-w-0 max-w-[1280px] mx-auto lg:mx-0">
+                {/* Player */}
+                <div
+                    className="w-full aspect-video bg-black rounded-2xl overflow-hidden border border-[#303030] shadow-2xl relative group">
+                    <div
+                        className="absolute inset-0 bg-gradient-to-br from-[#1a1a1a] to-[#0a0a0a] flex items-center justify-center">
+                        <div
+                            className="w-20 h-20 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md group-hover:scale-110 transition-transform cursor-pointer">
+                            <div
+                                className="w-0 h-0 border-t-[12px] border-t-transparent border-l-[20px] border-l-white border-b-[12px] border-b-transparent ml-2" />
+                        </div>
+                    </div>
+                </div>
+
+                {/* Title & Actions */}
+                <div className="mt-4 space-y-4">
+                    <h1 className="text-xl md:text-2xl font-bold leading-tight line-clamp-2">
+                        Sample Video Title - How to Build Something Amazing with Popped.dev
+                    </h1>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 py-2">
+                        <div className="flex items-center gap-3">
+                            <div
+                                className="w-10 h-10 rounded-full bg-gradient-to-tr from-orange-500 to-red-600 flex-shrink-0" />
+                            <div className="flex flex-col">
+                                <span className="font-bold text-[16px]">Channel Name</span>
+                                <span className="text-[12px] text-[#AAAAAA]">125K subscribers</span>
+                            </div>
+                            <button
+                                className="ml-4 bg-white text-black px-4 py-2 rounded-full font-bold text-[14px] hover:bg-gray-200 transition-colors">
+                                Subscribe
+                            </button>
+                        </div>
+
+                        <div className="flex items-center gap-2 overflow-x-auto no-scrollbar">
+                            <div className="flex items-center bg-[#272727] rounded-full p-0.5">
+                                <button
+                                    className="flex items-center gap-2 px-4 py-1.5 hover:bg-[#3f3f3f] rounded-l-full transition-colors border-r border-white/10">
+                                    <ThumbsUp size={18} />
+                                    <span className="text-[14px] font-medium">45K</span>
+                                </button>
+                                <button className="px-4 py-1.5 hover:bg-[#3f3f3f] rounded-r-full transition-colors">
+                                    <div className="rotate-180">
+                                        <ThumbsUp size={18} />
+                                    </div>
+                                </button>
+                            </div>
+                            <button
+                                className="flex items-center gap-2 bg-[#272727] px-4 py-2 rounded-full hover:bg-[#3f3f3f] transition-colors">
+                                <Share2 size={18} />
+                                <span className="text-[14px] font-medium">Share</span>
+                            </button>
+                            <button className="p-2 bg-[#272727] rounded-full hover:bg-[#3f3f3f] transition-colors">
+                                <MoreVertical size={18} />
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Description Box */}
+                    <div
+                        className="bg-[#1a1a1a] rounded-xl p-4 text-[14px] leading-relaxed hover:bg-[#222222] transition-colors cursor-pointer">
+                        <div className="flex gap-2 font-bold mb-1">
+                            <span>1.2M views</span>
+                            <span>Mar 10, 2025</span>
+                        </div>
+                        <p className="text-[#F1F1F1]">
+                            Explore the future of web development and design systems. In this tutorial, we dive into how
+                            Paper and Popped.dev can streamline your creative workflow from ideation to production-ready
+                            code.
+                        </p>
+                        <button className="mt-2 font-bold hover:underline">Show more</button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Sidebar Recommendations */}
+            <div className="lg:w-[400px] shrink-0 flex flex-col gap-4">
+                <h3 className="text-[16px] font-bold px-1">Related Videos</h3>
+                <div className="flex flex-col gap-3">
+                    <RelatedVideo title="Building Responsive Layouts with Tailwind CSS" channel="Design Pro"
+                        views="50K" />
+                    <RelatedVideo title="The Secret to Dark Mode UI Design" channel="UX Master" views="12K" />
+                    <RelatedVideo title="Paper to React: A Complete Workflow" channel="popped.dev" views="85K" />
+                    <RelatedVideo title="Advanced Animation Techniques in 2026" channel="Motion Weekly" views="1.1M" />
+                    <RelatedVideo title="Why System-UI Fonts are Back in Style" channel="Typo Talk" views="22K" />
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <style>
+        {
+            ` .no-scrollbar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .no-scrollbar {
+                -ms-overflow-style: none;
+                scrollbar-width: none;
+            }
+
+            `
+        }
+    </style>
+</div>
+);
+}

@@ -1,0 +1,205 @@
+import React, { useState } from 'react';
+import { 
+  Menu, 
+  Search, 
+  Home, 
+  PlaySquare, 
+  Clock, 
+  Bell, 
+  Moon,
+  MoreVertical,
+  History,
+  Library,
+  X
+} from 'lucide-react';
+
+const VideoCard = ({ title, channel, views, time, duration }) => (
+  <div className="flex flex-col gap-3 group cursor-pointer">
+    <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-[#272727] transition-all group-hover:rounded-none">
+      {/* Thumbnail Placeholder */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-700 to-gray-800" />
+      {duration && (
+        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-[12px] font-medium px-1.5 py-0.5 rounded">
+          {duration}
+        </div>
+      )}
+    </div>
+    <div className="flex gap-3">
+      <div className="h-9 w-9 shrink-0 rounded-full bg-[#383838]" />
+      <div className="flex flex-col min-w-0">
+        <h3 className="text-[16px] font-medium text-[#F1F1F1] leading-5 line-clamp-2">
+          {title}
+        </h3>
+        <p className="text-[14px] text-[#AAAAAA] mt-1 hover:text-[#F1F1F1] transition-colors">
+          {channel}
+        </p>
+        <p className="text-[14px] text-[#AAAAAA]">
+          {views} • {time}
+        </p>
+      </div>
+    </div>
+  </div>
+);
+
+const SidebarItem = ({ icon: Icon, label, active = false }) => (
+  <div className={`flex items-center gap-6 px-4 py-2.5 rounded-lg cursor-pointer transition-colors ${active ? 'bg-[#272727]' : 'hover:bg-[#272727]'}`}>
+    <Icon size={24} color={active ? "#FFFFFF" : "#F1F1F1"} />
+    <span className={`text-[14px] font-sans ${active ? 'font-medium text-white' : 'text-[#F1F1F1]'}`}>
+      {label}
+    </span>
+  </div>
+);
+
+export default function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+  const categories = ["All", "Music", "Gaming", "Live", "Coding", "React", "TypeScript", "Tailwind", "Open Source"];
+  
+  const videos = [
+    {
+      title: "How to build a privacy-friendly YouTube alternative",
+      channel: "popped.dev",
+      views: "12K views",
+      time: "2 days ago",
+      duration: "14:20"
+    },
+    {
+      title: "The future of open-source video and distributed systems",
+      channel: "Tech Channel",
+      views: "45K views",
+      time: "1 week ago",
+      duration: "22:04"
+    },
+    {
+      title: "Crystal lang: fast and elegant like Ruby, fast as C",
+      channel: "Dev Talks",
+      views: "8.2K views",
+      time: "3 days ago",
+      duration: "08:15"
+    },
+    {
+      title: "Docker from zero to hero: Master containers in 2026",
+      channel: "Cloud Native",
+      views: "22K views",
+      time: "5 days ago",
+      duration: "45:30"
+    },
+    {
+      title: "Privacy-first browsing in 2025: What you need to know",
+      channel: "Security Weekly",
+      views: "3.1K views",
+      time: "1 day ago",
+      duration: "04:32"
+    },
+    {
+      title: "RSS feeds for developers: Reclaiming your information stream",
+      channel: "Dev Tools",
+      views: "5.6K views",
+      time: "4 days ago",
+      duration: "12:04"
+    }
+  ];
+
+  const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
+
+  return (
+    <div className="flex flex-col h-screen w-screen bg-[#0F0F0F] text-white overflow-hidden font-sans">
+      {/* Header */}
+      <header className="h-14 px-4 flex items-center justify-between shrink-0 z-50 bg-[#0F0F0F]">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={toggleSidebar}
+            className="p-2 hover:bg-[#272727] rounded-full transition-colors active:scale-95"
+          >
+            {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+          <div className="flex items-center gap-0.5 cursor-pointer">
+            <span className="text-[18px] font-bold tracking-tight">popped</span>
+            <span className="text-[18px] font-bold text-[#FF0000]">.dev</span>
+          </div>
+        </div>
+
+        <div className="flex-1 max-w-[720px] px-4">
+          <div className="flex items-center">
+            <div className="flex-1 flex items-center bg-[#121212] border border-[#303030] rounded-l-full px-4 py-1.5 focus-within:border-blue-500">
+              <input 
+                type="text" 
+                placeholder="Search" 
+                className="bg-transparent w-full outline-none text-white text-[16px]"
+              />
+            </div>
+            <button className="bg-[#222222] border border-l-0 border-[#303030] px-5 py-[7.5px] rounded-r-full hover:bg-[#272727]">
+              <Search size={20} className="text-gray-400" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button className="p-2 hover:bg-[#272727] rounded-full">
+            <Moon size={22} />
+          </button>
+          <button className="p-2 hover:bg-[#272727] rounded-full">
+            <Bell size={22} />
+          </button>
+          <div className="w-8 h-8 flex items-center justify-center bg-purple-600 rounded-full text-sm font-medium ml-2 cursor-pointer">
+            A
+          </div>
+        </div>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar */}
+        <aside 
+          className={`flex-shrink-0 flex flex-col py-3 overflow-y-auto transition-all duration-300 ease-in-out border-r border-[#303030]/50 ${
+            isSidebarOpen ? 'w-60 translate-x-0 opacity-100' : 'w-0 -translate-x-full opacity-0 pointer-events-none'
+          }`}
+        >
+          <div className="w-60"> {/* Fixed width container inside transition wrapper */}
+            <SidebarItem icon={Home} label="Home" active />
+            <SidebarItem icon={PlaySquare} label="Subscriptions" />
+            <div className="h-[1px] bg-[#303030] my-3 mx-4" />
+            <SidebarItem icon={Library} label="Library" />
+            <SidebarItem icon={History} label="History" />
+            <SidebarItem icon={Clock} label="Watch later" />
+          </div>
+        </aside>
+
+        {/* Main Content Area */}
+        <main className="flex-1 flex flex-col overflow-hidden">
+          {/* Categories Bar */}
+          <div className="h-14 flex items-center px-6 gap-3 overflow-x-auto no-scrollbar shrink-0 border-b border-[#303030]/30">
+            {categories.map((cat, i) => (
+              <button 
+                key={cat}
+                className={`px-3 py-1.5 rounded-lg text-[14px] font-medium whitespace-nowrap transition-colors ${
+                  i === 0 ? 'bg-white text-black' : 'bg-[#272727] text-white hover:bg-[#3F3F3F]'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+
+          {/* Video Grid */}
+          <div className="flex-1 overflow-y-auto p-6 scroll-smooth bg-[#0F0F0F]">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-x-4 gap-y-10">
+              {[...videos, ...videos, ...videos].map((video, idx) => (
+                <VideoCard key={idx} {...video} />
+              ))}
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+    </div>
+  );
+}

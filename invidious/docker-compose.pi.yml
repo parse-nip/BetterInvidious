@@ -1,0 +1,84 @@
+# BetterInvidious - Full stack on Raspberry Pi
+# No Fly.io. Everything runs locally. Companion uses tinyproxy on host for YouTube.
+#
+# Prerequisites on Pi:
+#   1. tinyproxy listening on 0.0.0.0:3128 (see docs/PROXY_VIA_PC.md)
+#   2. Build React UI on your PC first: .\scripts\build-react-ui.ps1
+#   3. Copy this project to the Pi (rsync, scp, or git clone)
+#
+# First build can take 45-90 min on Pi 4 (Crystal compile).
+# Expose with: bore local 3000 --to bore.pub
+# Or port forward 3000 from your router.
+
+services:
+  invidious:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.arm64
+      args:
+        release: "1"
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:3000:3000"
+    depends_on:
+      invidious-db:
+        condition: service_healthy
+        restart: true
+      companion:
+        condition: service_started
+    environment:
+      INVIDIOUS_CONFIG: |
+        db:
+          dbname: invidious
+          user: kemal
+          password: kemal
+          host: invidious-db
+          port: 5432
+        check_tables: true
+        invidious_companion:
+          - private_url: "http://companion:8282/companion"
+        invidious_companion_key: "b2c3d4e5f6g7h8i9"
+        hmac_key: "a1b2c3d4e5f6g7h8"
+        external_port: 3000
+        domain: "localhost"
+        https_only: false
+    healthcheck:
+      test: wget -nv --tries=1 --spider http://127.0.0.1:3000/api/v1/stats || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 2
+
+  companion:
+    image: quay.io/invidious/invidious-companion:latest
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SERVER_SECRET_KEY: "b2c3d4e5f6g7h8i9"
+      PROXY: "http://host.docker.internal:3128"
+    cap_drop:
+      - ALL
+    read_only: true
+    volumes:
+      - companioncache:/var/tmp/youtubei.js:rw
+    security_opt:
+      - no-new-privileges:true
+
+  invidious-db:
+    image: docker.io/library/postgres:14
+    restart: unless-stopped
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+      - ./config/sql:/config/sql
+      - ./config/sql:/docker-entrypoint-initdb.d/config/sql
+      - ./docker/init-invidious-db.sh:/docker-entrypoint-initdb.d/init-invidious-db.sh
+    environment:
+      POSTGRES_DB: invidious
+      POSTGRES_USER: kemal
+      POSTGRES_PASSWORD: kemal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+
+volumes:
+  postgresdata:
+  companioncache:

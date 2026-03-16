@@ -1,0 +1,12 @@
+[Unit]
+Description=Bore tunnel for BetterInvidious
+After=network.target docker.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/bore local 3000 --to bore.pub
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

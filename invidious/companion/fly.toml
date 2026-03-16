@@ -1,0 +1,42 @@
+# Invidious Companion - internal service for BetterInvidious
+# Reachable via betterinvidious-companion.internal:8282 (Fly 6PN)
+# Deploy with: fly deploy -c companion/fly.toml
+#
+# Required secrets before first deploy:
+#   fly secrets set SERVER_SECRET_KEY=<16-char-key> -a betterinvidious-companion
+#   (Use the SAME key as INVIDIOUS_INVIDIOUS_COMPANION_KEY in the main app)
+#
+# REQUIRED: PROXY - YouTube blocks Fly.io datacenter IPs. Without it you get:
+#   "Failed to validate PO token" / "No valid format found for video"
+#   fly secrets set PROXY="http://user:pass@proxy-host:port" -a betterinvidious-companion
+#   Or SOCKS5: fly secrets set PROXY="socks5://proxy-host:port" -a betterinvidious-companion
+# Use residential/non-datacenter proxy (Bright Data, Oxylabs, etc.)
+
+app = "betterinvidious-companion"
+
+# Must match main app region for .internal DNS and min_machines_running
+# Use same region as your deployed machines (run: fly status -a betterinvidious-companion)
+primary_region = "sin"
+
+[build]
+  image = "quay.io/invidious/invidious-companion:latest"
+
+[env]
+  # Retry YouTube requests on transient failures (helps with rate limiting)
+  NETWORKING_FETCH_RETRY_ENABLED = "true"
+  NETWORKING_FETCH_RETRY_TIMES = "3"
+  NETWORKING_FETCH_RETRY_INITIAL_DEBOUNCE = "1000"
+  NETWORKING_FETCH_RETRY_DEBOUNCE_MULTIPLIER = "2"
+  # PO token stays enabled (default) - required for video playback
+
+[http_service]
+  internal_port = 8282
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1

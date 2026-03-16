@@ -1,0 +1,17 @@
+<% content_for "header" do %>
+<meta name="description" content="<%= translate(locale, "An alternative front-end to YouTube") %>">
+<title>
+    popped.dev - <%= translate(locale, "search") %>
+</title>
+<link rel="stylesheet" href="/css/empty.css?v=<%= ASSET_COMMIT %>">
+<% end %>
+
+<div class="yt-search-home">
+    <a href="/" class="yt-search-home-logo"><span>popped</span>.dev</a>
+    <form class="pure-form" action="/search" method="get">
+        <div class="yt-search-wrap">
+            <input type="search" id="searchbox" name="q" placeholder="<%= translate(locale, "search") %>" autocorrect="off" autocapitalize="none" spellcheck="false" autofocus>
+        </div>
+        <button type="submit" class="yt-search-btn" aria-label="<%= translate(locale, "search") %>" style="display:none;"> </button>
+    </form>
+</div>

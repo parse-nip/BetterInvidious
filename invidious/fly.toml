@@ -1,0 +1,43 @@
+# BetterInvidious - Fly.io deployment
+# See FLY_DEPLOY.md for full setup instructions.
+#
+# Prerequisites:
+#   1. fly postgres create
+#   2. fly postgres attach <postgres-app> -a betterinvidious
+#   3. fly launch --no-deploy -a betterinvidious-companion (see companion/)
+#   4. fly secrets set INVIDIOUS_INVIDIOUS_COMPANION_KEY=... INVIDIOUS_HMAC_KEY=...
+
+app = "betterinvidious"
+
+primary_region = "sin"
+
+[deploy]
+  release_command = "/invidious/invidious --migrate"
+
+[build]
+  dockerfile = "docker/Dockerfile"
+  [build.args]
+    release = "1"
+
+[env]
+  INVIDIOUS_CONFIG = """
+check_tables: true
+invidious_companion:
+  - private_url: "http://betterinvidious-companion.internal:8282/companion"
+domain: "invidious.popped.dev"
+https_only: true
+external_port: 443
+"""
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["app"]
+
+[[vm]]
+  memory = "1gb"
+  cpu_kind = "shared"
+  cpus = 1

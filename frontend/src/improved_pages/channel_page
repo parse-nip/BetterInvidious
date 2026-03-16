@@ -1,0 +1,222 @@
+import React, { useState } from 'react';
+import { 
+  Menu, 
+  Search, 
+  Home, 
+  PlaySquare, 
+  History, 
+  Moon, 
+  Bell, 
+  MoreVertical,
+  X,
+  Search as SearchIcon,
+  Check,
+  ChevronRight,
+  Filter
+} from 'lucide-react';
+
+const VideoCard = ({ title, views, time, thumbnailGradient }) => (
+  <div className="flex flex-col gap-3 group cursor-pointer">
+    <div className={`relative aspect-video rounded-xl overflow-hidden bg-gradient-to-br ${thumbnailGradient} border border-[#303030]/50 shadow-sm transition-all group-hover:scale-[1.02] group-hover:shadow-xl`}>
+      <div className="absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors" />
+      <div className="absolute bottom-2 right-2 bg-black/80 px-1.5 py-0.5 rounded text-[11px] font-bold">12:45</div>
+    </div>
+    <div className="flex flex-col">
+      <h3 className="text-[14px] font-bold text-[#F1F1F1] line-clamp-2 leading-snug group-hover:text-white">
+        {title}
+      </h3>
+      <div className="text-[12px] text-[#AAAAAA] mt-1 flex items-center gap-1">
+        <span>{views} views</span>
+        <span className="w-1 h-1 rounded-full bg-[#303030]" />
+        <span>{time}</span>
+      </div>
+    </div>
+  </div>
+);
+
+export default function App() {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [activeTab, setActiveTab] = useState('Home');
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  const tabs = ['Home', 'Videos', 'Shorts', 'Live', 'Playlists', 'Community'];
+
+  return (
+    <div className="flex flex-col h-screen w-full bg-[#0F0F0F] text-[#F1F1F1] font-sans overflow-hidden">
+      {/* Header */}
+      <header className="h-14 px-4 flex items-center justify-between shrink-0 bg-[#0F0F0F] z-50 border-b border-white/5">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            className="p-2 hover:bg-[#272727] rounded-full transition-colors"
+          >
+            {isSidebarOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+          <div className="flex items-center gap-0.5 cursor-pointer">
+            <span className="text-[18px] font-bold tracking-tight">popped</span>
+            <span className="text-[18px] font-bold text-[#FF0000]">.dev</span>
+          </div>
+        </div>
+
+        <div className="hidden md:flex flex-1 max-w-[640px] px-8">
+          <div className="flex w-full items-center">
+            <div className="flex-1 flex items-center bg-[#121212] border border-[#303030] rounded-l-full px-4 py-1.5 focus-within:border-blue-500 transition-all">
+              <input 
+                type="text" 
+                placeholder="Search" 
+                className="bg-transparent w-full outline-none text-white text-[15px]"
+              />
+            </div>
+            <button className="bg-[#222222] border border-l-0 border-[#303030] px-5 py-[7.5px] rounded-r-full hover:bg-[#272727]">
+              <SearchIcon size={18} className="text-gray-400" />
+            </button>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <button className="p-2 hover:bg-[#272727] rounded-full"><Bell size={20} /></button>
+          <div className="w-8 h-8 flex items-center justify-center bg-orange-600 rounded-full text-sm font-bold ml-2 cursor-pointer ring-2 ring-transparent hover:ring-white/20">
+            A
+          </div>
+        </div>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden relative">
+        {/* Sidebar */}
+        <aside 
+          className={`shrink-0 overflow-y-auto transition-all duration-300 ease-in-out border-r border-[#303030]/50 bg-[#0F0F0F] ${
+            isSidebarOpen ? 'w-60' : 'w-0 -translate-x-full'
+          }`}
+        >
+          <div className="w-60 p-3 flex flex-col gap-1">
+            <div className="flex items-center gap-5 px-3 py-2.5 rounded-xl hover:bg-[#272727] transition-colors cursor-pointer">
+              <Home size={20} />
+              <span className="text-[14px] font-medium">Home</span>
+            </div>
+            <div className="flex items-center gap-5 px-3 py-2.5 rounded-xl bg-[#272727] cursor-pointer">
+              <PlaySquare size={20} />
+              <span className="text-[14px] font-medium">Subscriptions</span>
+            </div>
+            <div className="flex items-center gap-5 px-3 py-2.5 rounded-xl hover:bg-[#272727] transition-colors cursor-pointer">
+              <History size={20} />
+              <span className="text-[14px] font-medium">History</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* Channel Content */}
+        <main className="flex-1 overflow-y-auto scroll-smooth">
+          {/* Banner */}
+          <div className="w-full h-40 md:h-64 bg-gradient-to-r from-[#1a1a1a] via-[#333333] to-[#1a1a1a] relative overflow-hidden">
+            <div className="absolute inset-0 opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-red-500/50 via-transparent to-transparent" />
+            <div className="absolute inset-0 flex items-center justify-center">
+               <span className="text-6xl font-black opacity-5 select-none tracking-widest uppercase">POPPED.DEV</span>
+            </div>
+          </div>
+
+          <div className="max-w-[1280px] mx-auto px-4 md:px-8">
+            {/* Channel Info */}
+            <div className="flex flex-col md:flex-row md:items-center gap-6 py-8">
+              <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-tr from-[#FF0000] to-purple-600 shrink-0 border-4 border-[#0F0F0F] shadow-2xl flex items-center justify-center text-5xl font-black">
+                P
+              </div>
+              <div className="flex flex-col flex-1 gap-2">
+                <h1 className="text-3xl md:text-4xl font-black">popped.dev</h1>
+                <p className="text-[#AAAAAA] text-[14px] md:text-[16px]">
+                  @popped_official • 1.2M subscribers • 150 videos
+                </p>
+                <p className="text-[#AAAAAA] text-[14px] line-clamp-1 hover:text-[#F1F1F1] cursor-pointer max-w-2xl">
+                  Building the future of developer-centric video platforms. Weekly deep dives into UI/UX, React, and building scalable systems... <ChevronRight size={14} className="inline" />
+                </p>
+                <div className="flex flex-wrap items-center gap-3 mt-4">
+                  <button 
+                    onClick={() => setIsSubscribed(!isSubscribed)}
+                    className={`px-6 py-2 rounded-full font-bold text-[14px] transition-all flex items-center gap-2 ${
+                      isSubscribed 
+                        ? 'bg-[#272727] text-[#AAAAAA] hover:bg-[#333333]' 
+                        : 'bg-white text-black hover:bg-gray-200'
+                    }`}
+                  >
+                    {isSubscribed ? <><Check size={18}/> Subscribed</> : 'Subscribe'}
+                  </button>
+                  <button className="bg-[#272727] hover:bg-[#333333] text-white px-6 py-2 rounded-full font-bold text-[14px] transition-colors">
+                    Join
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Tabs */}
+            <div className="flex items-center gap-8 border-b border-[#303030] overflow-x-auto no-scrollbar scroll-smooth">
+              {tabs.map(tab => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`py-3.5 text-[14px] font-bold whitespace-nowrap transition-all relative ${
+                    activeTab === tab ? 'text-white' : 'text-[#AAAAAA] hover:text-white'
+                  }`}
+                >
+                  {tab}
+                  {activeTab === tab && (
+                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-white rounded-t-full" />
+                  )}
+                </button>
+              ))}
+              <div className="ml-auto flex items-center pb-1">
+                <button className="p-2 text-[#AAAAAA] hover:text-white"><SearchIcon size={18}/></button>
+              </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="py-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold">Latest Videos</h2>
+                <button className="flex items-center gap-2 text-[14px] font-bold text-[#AAAAAA] hover:text-white">
+                  <Filter size={18}/> Sort by
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-10">
+                <VideoCard 
+                  title="Mastering Responsive Design in 2026" 
+                  views="450K" 
+                  time="2 days ago" 
+                  thumbnailGradient="from-indigo-900 to-blue-900"
+                />
+                <VideoCard 
+                  title="Why We Ditched React for Web Components" 
+                  views="1.2M" 
+                  time="1 week ago" 
+                  thumbnailGradient="from-red-900 to-orange-900"
+                />
+                <VideoCard 
+                  title="Building popped.dev: Part 1 Architecture" 
+                  views="89K" 
+                  time="2 weeks ago" 
+                  thumbnailGradient="from-purple-900 to-pink-900"
+                />
+                <VideoCard 
+                  title="The Secret to High Performance CSS" 
+                  views="230K" 
+                  time="3 weeks ago" 
+                  thumbnailGradient="from-emerald-900 to-teal-900"
+                />
+                <VideoCard 
+                  title="Cyberpunk UI: From Sketch to Code" 
+                  views="600K" 
+                  time="1 month ago" 
+                  thumbnailGradient="from-slate-800 to-gray-900"
+                />
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      <style>{`
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      `}</style>
+    </div>
+  );
+}

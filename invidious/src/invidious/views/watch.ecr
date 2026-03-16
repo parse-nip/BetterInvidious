@@ -1,0 +1,326 @@
+<% ucid = video.ucid %>
+<% title = HTML.escape(video.title) %>
+<% author = HTML.escape(video.author) %>
+
+
+<% content_for "header" do %>
+<meta name="thumbnail" content="<%= thumbnail %>">
+<meta name="description" content="<%= HTML.escape(video.short_description) %>">
+<meta name="keywords" content="<%= video.keywords.join(",") %>">
+<meta property="og:site_name" content="<%= author %> | Invidious">
+<meta property="og:url" content="<%= HOST_URL %>/watch?v=<%= video.id %>">
+<meta property="og:title" content="<%= title %>">
+<meta property="og:image" content="<%= HOST_URL %>/vi/<%= video.id %>/maxres.jpg">
+<meta property="og:description" content="<%= HTML.escape(video.short_description) %>">
+<meta property="og:type" content="video.other">
+<meta property="og:video:url" content="<%= HOST_URL %>/embed/<%= video.id %>">
+<meta property="og:video:secure_url" content="<%= HOST_URL %>/embed/<%= video.id %>">
+<meta property="og:video:type" content="text/html">
+<meta property="og:video:width" content="1280">
+<meta property="og:video:height" content="720">
+<meta name="twitter:card" content="player">
+<meta name="twitter:url" content="<%= HOST_URL %>/watch?v=<%= video.id %>">
+<meta name="twitter:title" content="<%= title %>">
+<meta name="twitter:description" content="<%= HTML.escape(video.short_description) %>">
+<meta name="twitter:image" content="<%= HOST_URL %>/vi/<%= video.id %>/maxres.jpg">
+<meta name="twitter:player" content="<%= HOST_URL %>/embed/<%= video.id %>">
+<meta name="twitter:player:width" content="1280">
+<meta name="twitter:player:height" content="720">
+<link rel="alternate" href="https://www.youtube.com/watch?v=<%= video.id %>">
+<%= rendered "components/player_sources" %>
+<title><%= title %> - popped.dev</title>
+
+<!-- Description expansion also updates the 'Show more' button to 'Show less' so
+we're going to need to do it here in order to allow for translations.
+ -->
+<style>
+#descexpansionbutton ~ label > a::after {
+    content: "<%= translate(locale, "Show more") %>"
+}
+
+#descexpansionbutton:checked ~ label > a::after {
+    content: "<%= translate(locale, "Show less") %>"
+}
+</style>
+<% end %>
+
+<script id="video_data" type="application/json">
+<%=
+{
+    "id" => video.id,
+    "index" => continuation,
+    "plid" => plid,
+    "length_seconds" => video.length_seconds.to_f,
+    "play_next" => !video.related_videos.empty? && !plid && params.continue,
+    "next_video" => video.related_videos.select { |rv| rv["id"]? }[0]?.try &.["id"],
+    "youtube_comments_text" => HTML.escape(translate(locale, "View YouTube comments")),
+    "reddit_comments_text" => HTML.escape(translate(locale, "View Reddit comments")),
+    "reddit_permalink_text" => HTML.escape(translate(locale, "View more comments on Reddit")),
+    "comments_text" => HTML.escape(translate(locale, "View `x` comments", "{commentCount}")),
+    "hide_replies_text" => HTML.escape(translate(locale, "Hide replies")),
+    "show_replies_text" => HTML.escape(translate(locale, "Show replies")),
+    "params" => params,
+    "preferences" => preferences,
+    "premiere_timestamp" => video.premiere_timestamp.try &.to_unix,
+    "vr" => video.vr?,
+    "projection_type" => video.projection_type,
+    "local_disabled" => CONFIG.disabled?("local"),
+    "support_reddit" => true,
+    "live_now" => video.live_now
+}.to_pretty_json
+%>
+</script>
+
+<div id="player-container" class="h-box">
+    <%= rendered "components/player" %>
+</div>
+
+<div class="yt-watch-layout">
+    <div class="yt-watch-primary">
+        <h1 class="yt-watch-title">
+            <%= title %>
+            <% if params.listen %>
+                <a title="<%=translate(locale, "Video mode")%>" id="link-iv-listen" data-base-url="/watch?<%= env.params.query %>&listen=0" href="/watch?<%= env.params.query %>&listen=0"><span class="material-icons" style="font-size:1.25rem;vertical-align:middle;">videocam</span></a>
+            <% else %>
+                <a title="<%=translate(locale, "Audio mode")%>" id="link-iv-listen" data-base-url="/watch?<%= env.params.query %>&listen=1" href="/watch?<%= env.params.query %>&listen=1"><span class="material-icons" style="font-size:1.25rem;vertical-align:middle;">headset</span></a>
+            <% end %>
+        </h1>
+        <% if !video.is_listed %><p style="margin:0 0 8px 0;font-size:0.875rem;color:var(--yt-text-secondary);"><span class="material-icons" style="font-size:1rem;vertical-align:middle;">lock_open</span> <%= translate(locale, "Unlisted") %></p><% end %>
+        <% if video.reason %><p style="margin:0 0 8px 0;"><%= video.reason %></p><% elsif video.premiere_timestamp.try &.> Time.utc %><p style="margin:0 0 8px 0;"><%= video.premiere_timestamp.try { |t| translate(locale, "Premieres in `x`", recode_date((t - Time.utc).ago, locale)) } %></p><% elsif video.live_now %><p style="margin:0 0 8px 0;"><%= video.premiere_timestamp.try { |t| translate(locale, "videoinfo_started_streaming_x_ago", recode_date((Time.utc - t).ago, locale)) } %></p><% end %>
+
+        <div class="yt-watch-meta-bar">
+            <span class="yt-watch-views"><%= translate_count(locale, "generic_views_count", video.views, NumberFormatting::Separator) %> • <%= video.published.to_s("%b %-d, %Y") %></span>
+            <div class="yt-watch-actions">
+                <button type="button" class="yt-action-btn" title="<%= translate(locale, "Like") %>"><span class="material-icons" style="font-size:1.25rem;">thumb_up</span> <%= number_with_separator(video.likes) %></button>
+                <a href="/watch?<%= env.params.query %>#comments" class="yt-action-btn"><span class="material-icons" style="font-size:1.25rem;">chat_bubble_outline</span> <%= translate(locale, "Comments") %></a>
+                <a id="link-yt-watch" rel="noreferrer noopener" data-base-url="<%= URI.new(scheme: "https", host: "www.youtube.com", path: "/watch", query: "v=#{video.id}") %>" href="<%= URI.new(scheme: "https", host: "www.youtube.com", path: "/watch", query: "v=#{video.id}") %>" class="yt-action-btn"><span class="material-icons" style="font-size:1.25rem;">share</span> <%= translate(locale, "videoinfo_watch_on_youTube") %></a>
+            </div>
+        </div>
+
+        <div class="yt-watch-channel-row">
+            <% sub_count_text = video.sub_count_text %>
+            <a href="/channel/<%= video.ucid %>">
+                <% if !video.author_thumbnail.empty? %>
+                    <img class="yt-watch-channel-avatar" src="/ggpht<%= URI.parse(video.author_thumbnail).request_target %>" alt="" />
+                <% else %>
+                    <div class="yt-watch-channel-avatar" style="background:var(--yt-bg-secondary);display:flex;align-items:center;justify-content:center;"><span class="material-icons">person</span></div>
+                <% end %>
+            </a>
+            <div class="yt-watch-channel-info">
+                <a href="/channel/<%= video.ucid %>" class="yt-watch-channel-name"><%= author %><% if video.author_verified %> <span class="material-icons" style="font-size:0.875rem;vertical-align:middle;">check_circle</span><% end %></a>
+                <p class="yt-watch-channel-subs"><%= video.sub_count_text %></p>
+            </div>
+            <%= rendered "components/subscribe_widget" %>
+        </div>
+
+        <div class="h-box yt-watch-description-section">
+            <span id="watch-on-youtube" style="display:block;margin-bottom:12px;font-size:0.8125rem;">
+                <%-
+                    link_yt_watch = URI.new(scheme: "https", host: "www.youtube.com", path: "/watch", query: "v=#{video.id}")
+                    link_yt_embed = URI.new(scheme: "https", host: "www.youtube.com", path: "/embed/#{video.id}")
+
+                    if !plid.nil? && !continuation.nil?
+                        link_yt_param = URI::Params{"list" => [plid], "index" => [continuation.to_s]}
+                        link_yt_watch = IV::HttpServer::Utils.add_params_to_url(link_yt_watch, link_yt_param)
+                        link_yt_embed = IV::HttpServer::Utils.add_params_to_url(link_yt_embed, link_yt_param)
+                    end
+                -%>
+                <a id="link-yt-watch" rel="noreferrer noopener" data-base-url="<%= link_yt_watch %>" href="<%= link_yt_watch %>"><%= translate(locale, "videoinfo_watch_on_youTube") %></a>
+                (<a id="link-yt-embed" rel="noopener" referrerpolicy="origin-when-cross-origin" data-base-url="<%= link_yt_embed %>" href="<%= link_yt_embed %>"><%= translate(locale, "videoinfo_youTube_embed_link") %></a>)
+            </span>
+
+            <p id="watch-on-another-invidious-instance">
+                <%- link_iv_other = IV::Frontend::Misc.redirect_url(env) -%>
+                <a id="link-iv-other" data-base-url="<%= link_iv_other %>" href="<%= link_iv_other %>"><%= translate(locale, "Switch Invidious Instance") %></a>
+            </p>
+
+            <p id="embed-link">
+                <%-
+                    params_iv_embed = env.params.query.dup
+                    params_iv_embed.delete_all("v")
+
+                    link_iv_embed = URI.new(path: "/embed/#{id}")
+                    link_iv_embed = IV::HttpServer::Utils.add_params_to_url(link_iv_embed, params_iv_embed)
+                -%>
+                <a id="link-iv-embed" data-base-url="<%= link_iv_embed %>" href="<%= link_iv_embed %>"><%= translate(locale, "videoinfo_invidious_embed_link") %></a>
+            </p>
+
+            <p id="annotations">
+                <% if params.annotations %>
+                    <a href="/watch?<%= env.params.query %>&iv_load_policy=3">
+                        <%= translate(locale, "Hide annotations") %>
+                    </a>
+                <% else %>
+                    <a href="/watch?<%= env.params.query %>&iv_load_policy=1">
+                        <%=translate(locale, "Show annotations")%>
+                    </a>
+                <% end %>
+            </p>
+
+            <% if user %>
+                <% playlists = Invidious::Database::Playlists.select_user_created_playlists(user.email) %>
+                <% if !playlists.empty? %>
+                    <form data-onsubmit="return_false" class="pure-form pure-form-stacked" action="/playlist_ajax?action=add_video" method="post" target="_blank">
+                        <div class="pure-control-group">
+                            <label for="playlist_id"><%= translate(locale, "Add to playlist: ") %></label>
+                            <select style="width:100%" name="playlist_id" id="playlist_id">
+                                <% playlists.each do |plid, playlist_title| %>
+                                    <option data-plid="<%= plid %>" value="<%= plid %>" <%= "selected" if user.preferences.default_playlist == plid %>><%= HTML.escape(playlist_title) %></option>
+                                <% end %>
+                            </select>
+                        </div>
+
+                        <input type="hidden" name="csrf_token" value="<%= URI.encode_www_form(env.get?("csrf_token").try &.as(String) || "") %>">
+                        <input type="hidden" name="video_id" value="<%= video.id %>">
+                        <button data-onclick="add_playlist_video" data-id="<%= video.id %>" type="submit" class="pure-button pure-button-primary">
+                            <b><%= translate(locale, "Add to playlist") %></b>
+                        </button>
+                    </form>
+                    <script id="playlist_data" type="application/json">
+                    <%=
+                    {
+                        "csrf_token" => URI.encode_www_form(env.get?("csrf_token").try &.as(String) || "")
+                    }.to_pretty_json
+                    %>
+                    </script>
+                    <script src="/js/playlist_widget.js?v=<%= Time.utc.to_unix_ms %>"></script>
+                <% end %>
+            <% end %>
+
+            <%= Invidious::Frontend::WatchPage.download_widget(locale, video, video_assets) %>
+
+            <p id="views" style="display:none"><i class="icon ion-ios-eye"></i> <%= number_with_separator(video.views) %></p>
+            <p id="likes" style="display:none"><i class="icon ion-ios-thumbs-up"></i> <%= number_with_separator(video.likes) %></p>
+            <p id="dislikes" style="display: none; visibility: hidden;"></p>
+            <p id="genre" style="font-size:0.8125rem;color:var(--yt-text-secondary);"><%= translate(locale, "Genre: ") %>
+                <% if !video.genre_url %>
+                    <%= video.genre %>
+                <% else %>
+                    <a href="<%= video.genre_url %>"><%= video.genre %></a>
+                <% end %>
+            </p>
+            <% if video.license %>
+                <% if video.license.empty? %>
+                    <p id="license"><%= translate(locale, "License: ") %><%= translate(locale, "Standard YouTube license") %></p>
+                <% else %>
+                    <p id="license"><%= translate(locale, "License: ") %><%= video.license %></p>
+                <% end %>
+            <% end %>
+            <p id="family_friendly"><%= translate(locale, "Family friendly? ") %><%= translate_bool(locale, video.is_family_friendly) %></p>
+            <p id="wilson" style="display: none; visibility: hidden;"></p>
+            <p id="rating" style="display: none; visibility: hidden;"></p>
+            <p id="engagement" style="display: none; visibility: hidden;"></p>
+            <% if video.allowed_regions.size != REGIONS.size %>
+                <p id="allowed_regions">
+                    <% if video.allowed_regions.size < REGIONS.size // 2 %>
+                        <%= translate(locale, "Whitelisted regions: ") %><%= video.allowed_regions.join(", ") %>
+                    <% else %>
+                        <%= translate(locale, "Blacklisted regions: ") %><%= (REGIONS.to_a - video.allowed_regions).join(", ") %>
+                    <% end %>
+                </p>
+            <% end %>
+
+            <p id="published-date" style="font-size:0.8125rem;color:var(--yt-text-secondary);margin:8px 0;">
+                <% if video.premiere_timestamp.try &.> Time.utc %>
+                    <b><%= video.premiere_timestamp.try { |t| translate(locale, "Premieres `x`", t.to_s("%B %-d, %R UTC")) } %></b>
+                <% else %>
+                    <b><%= translate(locale, "Shared `x`", video.published.to_s("%B %-d, %Y")) %></b>
+                <% end %>
+            </p>
+
+            <div id="description-box"> <!-- Description -->
+                <% if video.description.size < 200 || params.extend_desc %>
+                    <div id="descriptionWrapper"><%= video.description_html %></div>
+                <% else %>
+                    <input id="descexpansionbutton" type="checkbox"/>
+                    <div id="descriptionWrapper"><%= video.description_html %></div>
+                    <label for="descexpansionbutton">
+                        <a></a>
+                    </label>
+                <% end %>
+            </div>
+
+            <hr style="border-color:var(--yt-border);">
+
+            <% if !video.music.empty? %>
+                <input id="music-desc-expansion" type="checkbox"/>
+                <label for="music-desc-expansion">
+                    <h3 id="music-description-title">
+                        <%= translate(locale, "Music in this video") %>
+                        <span class="icon ion-ios-arrow-up"></span>
+                        <span class="icon ion-ios-arrow-down"></span>
+                    </h3>
+                </label>
+
+                <div id="music-description-box">
+                    <% video.music.each do |music| %>
+                        <div class="music-item">
+                            <p class="music-song"><%= translate(locale, "Song: ") %><%= music.song %></p>
+                            <p class="music-artist"><%= translate(locale, "Artist: ") %><%= music.artist %></p>
+                            <p class="music-album"><%= translate(locale, "Album: ") %><%= music.album %></p>
+                        </div>
+                    <% end %>
+                </div>
+            <% end %>
+            <hr style="border-color:var(--yt-border);">
+
+            <div id="comments" class="comments">
+                <% if nojs %>
+                    <%= comment_html %>
+                <% else %>
+                    <noscript>
+                        <a href="/watch?<%= env.params.query %>&nojs=1">
+                            <%= translate(locale, "Hi! Looks like you have JavaScript turned off. Click here to view comments, keep in mind they may take a bit longer to load.") %>
+                        </a>
+                    </noscript>
+                <% end %>
+            </div>
+        </div>
+    </div>
+
+    <% if params.related_videos || plid %>
+        <div class="yt-watch-secondary">
+            <% if plid %>
+                <div id="playlist" class="h-box"></div>
+            <% end %>
+            <% if params.related_videos %>
+                <% if !video.related_videos.empty? %>
+                    <div <% if plid %>style="display:none"<% end %> class="h-box">
+                        <div class="pure-control-group">
+                            <label for="continue"><%= translate(locale, "preferences_continue_label") %></label>
+                            <input name="continue" id="continue" type="checkbox" <% if params.continue %>checked<% end %>>
+                        </div>
+                        <hr style="border-color:var(--yt-border);">
+                    </div>
+                <% end %>
+                <h2 class="yt-related-title"><%= translate(locale, "preferences_related_videos_label").gsub(/:?\s*$/, "") %></h2>
+                <% video.related_videos.each do |rv| %>
+                    <% if rv["id"]? %>
+                        <a href="/watch?v=<%= rv["id"] %>&listen=<%= params.listen %>" class="yt-related-item">
+                            <div class="yt-related-item-thumb">
+                                <%- if !env.get("preferences").as(Preferences).thin_mode -%>
+                                    <img loading="lazy" src="/vi/<%= rv["id"] %>/mqdefault.jpg" alt="" />
+                                <%- else -%>
+                                    <div style="width:100%;height:100%;background:var(--yt-bg-secondary);"></div>
+                                <%- end -%>
+                                <%- if (length_seconds = rv["length_seconds"]?.try &.to_i?) && length_seconds != 0 -%>
+                                    <span class="yt-video-card-duration" style="position:absolute;bottom:4px;right:4px;"><%= recode_length_seconds(length_seconds) %></span>
+                                <%- end -%>
+                            </div>
+                            <div class="yt-related-item-info">
+                                <p class="yt-related-item-title" dir="auto"><%= HTML.escape(rv["title"]) %></p>
+                                <p class="yt-related-item-channel"><%= rv["author"]? %></p>
+                                <p class="yt-related-item-views"><%=
+                                    views = short_text_to_number(rv["short_view_count"]? || "0")
+                                    translate_count(locale, "generic_views_count", views, NumberFormatting::Short)
+                                %></p>
+                            </div>
+                        </a>
+                    <% end %>
+                <% end %>
+            <% end %>
+        </div>
+    <% end %>
+</div>
+<script src="/js/comments.js?v=<%= ASSET_COMMIT %>"></script>
+<script src="/js/watch.js?v=<%= ASSET_COMMIT %>"></script>

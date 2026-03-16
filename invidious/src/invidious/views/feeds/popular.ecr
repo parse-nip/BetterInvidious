@@ -1,0 +1,31 @@
+<% content_for "header" do %>
+<meta name="description" content="<%= translate(locale, "An alternative front-end to YouTube") %>">
+<title>
+    <% if env.get("preferences").as(Preferences).default_home != "Popular" %>
+        <%= translate(locale, "Popular") %> - popped.dev
+    <% else %>
+        popped.dev
+    <% end %>
+</title>
+<% end %>
+
+<!-- Categories bar (All, Music, Gaming, Live, Coding, etc.) -->
+<div class="yt-categories-bar">
+    <a href="/" class="yt-category-chip active">All</a>
+    <a href="/search?q=Music" class="yt-category-chip">Music</a>
+    <a href="/search?q=Gaming" class="yt-category-chip">Gaming</a>
+    <a href="/search?q=Live" class="yt-category-chip">Live</a>
+    <a href="/search?q=Coding" class="yt-category-chip">Coding</a>
+    <a href="/search?q=React" class="yt-category-chip">React</a>
+    <a href="/search?q=TypeScript" class="yt-category-chip">TypeScript</a>
+    <a href="/search?q=Tailwind" class="yt-category-chip">Tailwind</a>
+    <a href="/search?q=Open+Source" class="yt-category-chip">Open Source</a>
+</div>
+
+<div class="pure-g yt-video-grid-legacy">
+<% popular_videos.each do |item| %>
+    <%= rendered "components/item" %>
+<% end %>
+</div>
+
+<script src="/js/watched_indicator.js"></script>

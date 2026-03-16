@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Roboto', Arial, sans-serif;
+}
+
+body {
+  font-family: 'Roboto', 'Arial', sans-serif;
+  background: white;
+  color: black;
+  margin: 0;
+  padding: 0;
+}
+
+body.yt-layout {
+  overflow: hidden;
+  height: 100vh;
+}
+
+html.yt-layout {
+  overflow: hidden;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
