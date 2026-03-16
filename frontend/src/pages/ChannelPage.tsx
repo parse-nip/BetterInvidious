@@ -42,6 +42,7 @@ export function ChannelPage() {
   const [tabLoading, setTabLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
 
   useEffect(() => {
     if (!ucid) {
@@ -52,6 +53,14 @@ export function ChannelPage() {
     setLoading(true);
     setError(null);
     api.getChannel(ucid).then(setChannel).catch((e) => setError(e.message)).finally(() => setLoading(false));
+  }, [ucid]);
+
+  useEffect(() => {
+    if (!ucid) return;
+    api
+      .getSubscriptions()
+      .then((subs) => setIsSubscribed(subs.some((s) => s.authorId === ucid)))
+      .catch(() => setIsSubscribed(false));
   }, [ucid]);
 
   useEffect(() => {
@@ -122,12 +131,26 @@ export function ChannelPage() {
               {channel.description?.slice(0, 200) ?? `Welcome to ${channel.author}!`}
             </p>
             <button
-              onClick={() => setIsSubscribed(!isSubscribed)}
-              className={`px-4 py-2 rounded-full font-medium transition-colors ${
+              onClick={async () => {
+                if (!ucid || subscribing) return;
+                setSubscribing(true);
+                const res = isSubscribed
+                  ? await api.unsubscribeChannel(ucid)
+                  : await api.subscribeChannel(ucid);
+                if (res.ok) {
+                  setIsSubscribed(!isSubscribed);
+                } else if (res.status === 401) {
+                  window.location.href = `/signup?referer=${encodeURIComponent(window.location.pathname + window.location.search)}`;
+                  return;
+                }
+                setSubscribing(false);
+              }}
+              disabled={subscribing}
+              className={`px-4 py-2 rounded-full font-medium transition-colors disabled:opacity-60 ${
                 isSubscribed ? 'bg-gray-100 text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'
               }`}
             >
-              {isSubscribed ? 'Subscribed' : 'Subscribe'}
+              {subscribing ? '…' : isSubscribed ? 'Subscribed' : 'Subscribe'}
             </button>
           </div>
         </div>

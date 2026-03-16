@@ -11,6 +11,42 @@ module Invidious::Routes::API::V1::Authenticated
   #   create_notification_stream(env, topics, connection_channel)
   # end
 
+  def self.get_me(env)
+    env.response.content_type = "application/json"
+    user = env.get("user").as(User)
+    sid = env.get("sid").as(String)
+    csrf_token = env.get?("csrf_token").try &.as(String) || ""
+    {email: user.email, csrf_token: csrf_token}.to_json
+  end
+
+  def self.signout(env)
+    user = env.get("user").as(User)
+    sid = env.get("sid").as(String)
+    locale = env.get("preferences").as(Preferences).locale
+
+    body = env.request.body.try &.gets_to_end || "{}"
+    token = nil
+    begin
+      token = JSON.parse(body)["csrf_token"]?.try &.as_s?
+    rescue
+    end
+
+    begin
+      validate_request(token, sid, env.request, HMAC_KEY, locale)
+    rescue ex
+      return error_json(400, ex)
+    end
+
+    Invidious::Database::SessionIDs.delete(sid: sid)
+
+    env.request.cookies.each do |cookie|
+      cookie.expires = Time.utc(1990, 1, 1)
+      env.response.cookies << cookie
+    end
+
+    env.response.status_code = 204
+  end
+
   def self.get_preferences(env)
     env.response.content_type = "application/json"
     user = env.get("user").as(User)

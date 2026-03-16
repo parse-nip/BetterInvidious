@@ -1,6 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { api } from '../../lib/api';
 
 const SvgSearch = () => (
   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -21,7 +22,21 @@ interface HeaderProps {
 
 export function Header({ isOpen, toggleSidebar }: HeaderProps) {
   const [searchQuery, setSearchQuery] = useState('');
+  const [user, setUser] = useState<{ email: string; csrf_token: string } | null | undefined>(undefined);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    api.getMe().then(setUser).catch(() => setUser(null));
+  }, []);
+
+  const handleSignOut = async () => {
+    if (!user?.csrf_token) return;
+    await api.signout(user.csrf_token);
+    setUser(null);
+    setUserMenuOpen(false);
+    window.location.reload();
+  };
 
   const handleSearch = (e: FormEvent) => {
     e.preventDefault();
@@ -70,13 +85,49 @@ export function Header({ isOpen, toggleSidebar }: HeaderProps) {
         </button>
       </form>
 
-      <div className="w-[180px] shrink-0 flex items-center justify-end gap-2">
-        <Link
-          to="/login"
-          className="flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm bg-blue-600 hover:bg-blue-700 text-white no-underline"
-        >
-          Sign in
-        </Link>
+      <div className="w-[220px] shrink-0 flex items-center justify-end gap-2">
+        {user === undefined ? (
+          <div className="w-20 h-9 rounded-full bg-gray-100 animate-pulse" />
+        ) : user ? (
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen((o) => !o)}
+              className="flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm bg-blue-600 hover:bg-blue-700 text-white max-w-[160px] truncate"
+              title={user.email}
+            >
+              {user.email}
+              <span className="text-xs opacity-80">▼</span>
+            </button>
+            {userMenuOpen && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setUserMenuOpen(false)} aria-hidden="true" />
+                <div className="absolute right-0 top-full mt-1 py-1 bg-white rounded-lg shadow-lg border border-gray-200 z-50 min-w-[140px]">
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Sign out
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              className="px-3 py-2 rounded-full font-medium text-sm text-gray-700 hover:bg-gray-100 no-underline"
+            >
+              Sign in
+            </Link>
+            <Link
+              to="/signup"
+              className="flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm bg-blue-600 hover:bg-blue-700 text-white no-underline"
+            >
+              Sign up
+            </Link>
+          </>
+        )}
       </div>
     </header>
   );

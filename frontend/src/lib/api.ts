@@ -209,6 +209,18 @@ export const api = {
     const params = continuation ? `?continuation=${continuation}` : '';
     return fetchApi<Playlist>(`/api/v1/playlists/${plid}${params}`);
   },
+  getMe: async (): Promise<{ email: string; csrf_token: string } | null> => {
+    const res = await fetch(API_BASE + '/api/v1/auth/me', { credentials: 'include' });
+    if (!res.ok) return null;
+    return res.json();
+  },
+  signout: (csrfToken: string) =>
+    fetch(API_BASE + '/api/v1/auth/signout', {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ csrf_token: csrfToken }),
+    }),
   getAuthPreferences: () => fetchApi<AuthPreferences>('/api/v1/auth/preferences'),
   setPreferences: (prefs: Partial<AuthPreferences>) =>
     fetch(API_BASE + '/api/v1/auth/preferences', {

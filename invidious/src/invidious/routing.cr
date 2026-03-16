@@ -284,6 +284,9 @@ module Invidious::Routing
 
       # Authenticated
 
+      get "/api/v1/auth/me", {{namespace}}::Authenticated, :get_me
+      post "/api/v1/auth/signout", {{namespace}}::Authenticated, :signout
+
       get "/api/v1/auth/preferences", {{namespace}}::Authenticated, :get_preferences
       post "/api/v1/auth/preferences", {{namespace}}::Authenticated, :set_preferences
 

@@ -21,6 +21,7 @@ const mainLinks = [
 ];
 
 const youLinks = [
+  { icon: 'Subscriptions', label: 'Subscriptions', path: '/feed/subscriptions' },
   { icon: 'History', label: 'History', path: '/feed/history' },
 ];
 
@@ -79,10 +80,8 @@ export function Sidebar({ isOpen, onOverlayClick }: SidebarProps) {
           {mainLinks.map((link) => (
             <LinkItem key={link.label} link={link} mini />
           ))}
-          <Link to="/feed/history" className={`flex flex-col items-center justify-center w-16 h-18 rounded-lg hover:bg-gray-100 py-4 ${location.pathname === '/feed/history' ? 'bg-gray-100' : ''}`}>
-            <span className="mb-1">{icons.History()}</span>
-            <span className="text-[10px] truncate w-full text-center">You</span>
-          </Link>
+          <LinkItem link={{ icon: 'Subscriptions', label: 'Subscriptions', path: '/feed/subscriptions' }} mini />
+          <LinkItem link={{ icon: 'History', label: 'History', path: '/feed/history' }} mini />
         </div>
 
         {/* Full Sidebar */}

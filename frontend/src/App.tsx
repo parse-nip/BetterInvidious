@@ -10,12 +10,14 @@ import { SubscriptionsPage } from './pages/SubscriptionsPage';
 import { HistoryPage } from './pages/HistoryPage';
 import { PlaylistsPage } from './pages/PlaylistsPage';
 import { LoginPage } from './pages/LoginPage';
+import { SignUpPage } from './pages/SignUpPage';
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignUpPage />} />
         <Route path="/" element={<Layout />}>
           <Route index element={<HomePage />} />
           <Route path="feed/popular" element={<HomePage />} />

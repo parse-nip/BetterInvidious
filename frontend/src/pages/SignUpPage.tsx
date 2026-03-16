@@ -1,9 +1,8 @@
 import { useState, type FormEvent } from 'react';
-import { useSearchParams, useNavigate, Link } from 'react-router-dom';
+import { useSearchParams, Link } from 'react-router-dom';
 
-export function LoginPage() {
+export function SignUpPage() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const referer = searchParams.get('referer') || '/';
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -32,9 +31,12 @@ export function LoginPage() {
   return (
     <div className="min-h-[60vh] flex items-center justify-center p-6">
       <div className="w-full max-w-md">
-        <h1 className="text-2xl font-bold text-[var(--yt-text)] mb-6 text-center">
-          <span className="text-[var(--yt-accent)]">popped</span>.dev
+        <h1 className="text-2xl font-bold text-[var(--yt-text)] mb-2 text-center">
+          Create your account
         </h1>
+        <p className="text-sm text-[var(--yt-text-secondary)] mb-6 text-center">
+          Use your email and a password. If an account exists, you&apos;ll be signed in instead.
+        </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-[var(--yt-text-secondary)] mb-1">
@@ -69,18 +71,14 @@ export function LoginPage() {
             type="submit"
             className="w-full py-2.5 rounded-lg bg-[var(--yt-accent)] text-white font-medium hover:bg-[var(--yt-accent-hover)]"
           >
-            Sign in
+            Create account
           </button>
         </form>
         <p className="mt-4 text-center text-sm text-[var(--yt-text-secondary)]">
-          Don&apos;t have an account?{' '}
-          <Link to={`/signup?referer=${encodeURIComponent(referer)}`} className="text-[var(--yt-accent)] hover:underline">
-            Sign up
+          Already have an account?{' '}
+          <Link to={`/login?referer=${encodeURIComponent(referer)}`} className="text-[var(--yt-accent)] hover:underline">
+            Sign in
           </Link>
-          {' · '}
-          <button type="button" onClick={() => navigate(-1)} className="text-[var(--yt-accent)] hover:underline">
-            Go back
-          </button>
         </p>
       </div>
     </div>
