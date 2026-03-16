@@ -225,6 +225,7 @@ export const api = {
   },
   getHistory: (page = 1) =>
     fetchApi<string[]>(`/api/v1/auth/history?page=${page}`),
+  getRecommended: () => fetchApi<Video[]>('/api/v1/auth/recommended'),
   getPlaylists: () =>
     fetchApi<Playlist[]>(`/api/v1/auth/playlists`),
   markWatched: (id: string) =>

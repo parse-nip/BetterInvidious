@@ -280,6 +280,41 @@ module Invidious::JSONify::APIv1
     end
   end
 
+  def related_video_to_json(rv : Hash(String, String), locale : String?, json : JSON::Builder)
+    return unless rv["id"]?
+    json.object do
+      json.field "videoId", rv["id"]
+      json.field "title", rv["title"]
+      json.field "videoThumbnails" { thumbnails(json, rv["id"]) }
+      json.field "author", rv["author"]?
+      json.field "authorUrl", "/channel/#{rv["ucid"]?}"
+      json.field "authorId", rv["ucid"]?
+      json.field "authorVerified", rv["author_verified"] == "true"
+      if rv["author_thumbnail"]?
+        json.field "authorThumbnails" do
+          json.array do
+            qualities = {32, 48, 76, 100, 176, 512}
+            qualities.each do |quality|
+              json.object do
+                json.field "url", rv["author_thumbnail"].to_s.gsub(/s\d+-/, "s#{quality}-")
+                json.field "width", quality
+                json.field "height", quality
+              end
+            end
+          end
+        end
+      end
+      json.field "lengthSeconds", rv["length_seconds"]?.try &.to_i
+      json.field "viewCountText", rv["short_view_count"]?
+      json.field "published", rv["published"]?
+      if rv["published"]?.try &.presence
+        json.field "publishedText", translate(locale, "`x` ago", recode_date(Time.parse_rfc3339(rv["published"].to_s), locale))
+      else
+        json.field "publishedText", ""
+      end
+    end
+  end
+
   def storyboards(json, id, storyboards)
     json.array do
       storyboards.each do |sb|

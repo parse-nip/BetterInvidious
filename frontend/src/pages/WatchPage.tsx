@@ -53,6 +53,8 @@ export function WatchPage() {
   useEffect(() => {
     if (videoId && video) {
       addToHistory(videoId);
+      // Sync to backend when logged in (fire-and-forget; 401 ignored)
+      api.markWatched(videoId).catch(() => {});
     }
   }, [videoId, video]);
 

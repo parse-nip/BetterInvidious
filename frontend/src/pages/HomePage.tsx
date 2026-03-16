@@ -13,16 +13,17 @@ export function HomePage() {
     setLoading(true);
     setError(null);
     const norm = (d: unknown): Video[] => Array.isArray(d) ? d : (d as { videos?: Video[] })?.videos ?? [];
-    // Use Gaming type for home: default "livestreams" returns live items with sparse metadata (no views/length).
-    // Gaming browse returns regular videos with full viewCount, lengthSeconds, etc.
-    api
-      .getTrending(undefined, 'Gaming')
-      .then((data) => {
+    const fallback = () =>
+      api.getTrending(undefined, 'Gaming').then((data) => {
         const list = norm(data);
         if (list.length > 0) return list;
         return api.getPopular().then(norm);
-      })
-      .catch(() => api.getPopular().then(norm))
+      }).catch(() => api.getPopular().then(norm));
+    // Try recommended first (auth required); fallback to trending/popular for guests or on error
+    api
+      .getRecommended()
+      .then((list) => (list.length > 0 ? list : fallback()))
+      .catch(() => fallback())
       .then((list) => {
         setVideos(list);
         // Enrich videos missing authorThumbnails in background (avoids blocking initial display)

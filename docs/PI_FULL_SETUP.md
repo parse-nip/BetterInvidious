@@ -115,6 +115,17 @@ docker compose -f docker-compose.pi.yml down
 docker compose -f docker-compose.pi.yml up -d --build
 ```
 
+## Sign in & accounts
+
+Login and registration are **enabled by default**. After the stack is running:
+
+1. Open the site (bore URL or `http://<pi-ip>:3000`)
+2. Click **Sign in** (top right)
+3. Enter email + password → account is created
+4. Watch videos, subscribe to channels → **Recommended** feed will populate
+
+See [SETUP_DATABASE_AND_AUTH.md](SETUP_DATABASE_AND_AUTH.md) for database details.
+
 ## Troubleshooting
 
 - **"Connection refused" to companion:** Ensure tinyproxy is running and listening on 0.0.0.0:3128.

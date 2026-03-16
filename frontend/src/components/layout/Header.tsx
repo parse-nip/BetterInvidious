@@ -70,7 +70,14 @@ export function Header({ isOpen, toggleSidebar }: HeaderProps) {
         </button>
       </form>
 
-      <div className="w-[180px] shrink-0" aria-hidden="true" />
+      <div className="w-[180px] shrink-0 flex items-center justify-end gap-2">
+        <Link
+          to="/login"
+          className="flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm bg-blue-600 hover:bg-blue-700 text-white no-underline"
+        >
+          Sign in
+        </Link>
+      </div>
     </header>
   );
 }

@@ -291,6 +291,7 @@ module Invidious::Routing
       post "/api/v1/auth/import/invidious", {{namespace}}::Authenticated, :import_invidious
 
       get "/api/v1/auth/history", {{namespace}}::Authenticated, :get_history
+      get "/api/v1/auth/recommended", {{namespace}}::Authenticated, :get_recommended
       post "/api/v1/auth/history/:id", {{namespace}}::Authenticated, :mark_watched
       delete "/api/v1/auth/history/:id", {{namespace}}::Authenticated, :mark_unwatched
       delete "/api/v1/auth/history", {{namespace}}::Authenticated, :clear_history

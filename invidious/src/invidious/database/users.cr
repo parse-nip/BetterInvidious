@@ -49,10 +49,26 @@ module Invidious::Database::Users
     PG_DB.exec(request, user.watched, user.email)
   end
 
+  WATCH_HISTORY_MAX = 300
+
   def mark_watched(user : User, vid : String)
     request = <<-SQL
+      WITH new_arr AS (
+        SELECT array_append(array_remove(watched, $1), $1) AS arr
+        FROM users
+        WHERE email = $2
+      ),
+      trimmed AS (
+        SELECT
+          CASE
+            WHEN array_length(arr, 1) > #{WATCH_HISTORY_MAX}
+            THEN arr[greatest(1, array_length(arr, 1) - #{WATCH_HISTORY_MAX - 1}):array_length(arr, 1)]
+            ELSE arr
+          END AS w
+        FROM new_arr
+      )
       UPDATE users
-      SET watched = array_append(array_remove(watched, $1), $1)
+      SET watched = (SELECT w FROM trimmed)
       WHERE email = $2
     SQL
 

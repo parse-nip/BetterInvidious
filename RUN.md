@@ -25,6 +25,7 @@ When `invidious/assets/react/index.html` exists, the backend serves the React ap
 
 1. **Docker Desktop** – If not installed, it was installed via winget. Start **Docker Desktop** from the Start menu and wait until it shows “Docker Desktop is running”.
 2. **Docker Compose** – Installed via winget (command: `docker-compose`).
+3. **Config** – Docker Compose uses built-in config. For **Raspberry Pi**, see [docs/PI_FULL_SETUP.md](docs/PI_FULL_SETUP.md). For **local dev without Docker**, run `.\scripts\setup-config.ps1` to create `config/config.yml` with login/registration enabled.
 
 ## Run the app
 
@@ -39,6 +40,7 @@ Or double‑click **`invidious\run-invidious.ps1`** (or run it from PowerShell).
 
 - **First run:** Building the image can take **15–30 minutes** (Crystal + deps compile in Docker).
 - When the build and startup finish, open: **http://127.0.0.1:3000**
+- **Sign in:** Click "Sign in" (top right) to create an account. Login and registration are enabled.
 
 ## Stop
 
@@ -126,7 +128,7 @@ See **[FLY_DEPLOY.md](FLY_DEPLOY.md)** for full instructions to deploy to Fly.io
   - `domain`: your public domain (e.g. `popped.dev`)
   - `https_only`: `true` for HTTPS
   - `external_port`: 443 if behind a reverse proxy
-- **Database** — Invidious uses PostgreSQL. Docker Compose typically sets this up.
+- **Database** — Invidious uses PostgreSQL. Docker Compose sets this up automatically. For manual setup, see [docs/SETUP_DATABASE_AND_AUTH.md](docs/SETUP_DATABASE_AND_AUTH.md).
 - **Secrets** — Set `hmac_key`, `cookie_key`, and any API keys in config or env.
 
 ### Example Nginx config

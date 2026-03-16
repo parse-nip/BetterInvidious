@@ -113,6 +113,75 @@ module Invidious::Routes::API::V1::Authenticated
     env.response.status_code = 204
   end
 
+  def self.get_recommended(env)
+    env.response.content_type = "application/json"
+    user = env.get("user").as(User)
+    locale = env.get("preferences").as(Preferences).locale
+
+    watched = user.watched
+    watched_set = watched.to_set
+    sub_set = user.subscriptions.to_set
+
+    seed_ids = [] of String
+
+    # From subscriptions: latest 4 videos per channel (max 8 channels)
+    user.subscriptions.first(8).each do |ucid|
+      begin
+        channel = get_about_info(ucid, locale)
+        videos, _ = Channel::Tabs.get_videos(channel, sort_by: "newest")
+        videos.select { |v| v.is_a?(SearchVideo) }.first(4).each do |v|
+          seed_ids << v.as(SearchVideo).id
+        end
+      rescue
+      end
+    end
+
+    # From watch history: last 20 (most recent at end of array)
+    watched.last(20).each { |id| seed_ids << id }
+
+    seed_ids = seed_ids.uniq.first(25)
+
+    # Expand via related videos from each seed
+    candidates = Hash(String, {Float64, Hash(String, String)}).new
+
+    seed_ids.each do |sid|
+      begin
+        video = get_video(sid)
+        video.related_videos.each do |rv|
+          rid = rv["id"]?
+          next unless rid
+          next if watched_set.includes?(rid)
+          next if rid == sid
+
+          score = 1.0
+          score += 3.0 if (ucid = rv["ucid"]?) && sub_set.includes?(ucid)
+
+          if candidates.has_key?(rid)
+            candidates[rid] = {candidates[rid][0] + score, rv}
+          else
+            candidates[rid] = {score, rv}
+          end
+        end
+      rescue
+      end
+    end
+
+    # Sort by score desc, add recency/randomization, take top 100
+    sorted = candidates.to_a
+      .sort_by { |_, (score, _)| -score }
+      .first(150)
+      .shuffle(Random::Secure)
+      .first(100)
+
+    JSON.build do |json|
+      json.array do
+        sorted.each do |_, (_, rv)|
+          Invidious::JSONify::APIv1.related_video_to_json(rv, locale, json)
+        end
+      end
+    end
+  end
+
   def self.feed(env)
     env.response.content_type = "application/json"
 
