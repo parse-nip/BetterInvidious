@@ -1,0 +1,76 @@
+# Same as docker-compose.pi.yml but uses pre-built ARM64 image from GitHub.
+# Build on PC: .\scripts\build-for-pi.ps1  (pushes to ghcr.io)
+# On Pi: git pull && docker compose -f docker-compose.pi-prebuilt.yml pull && docker compose -f docker-compose.pi-prebuilt.yml up -d
+
+services:
+  invidious:
+    image: ghcr.io/parse-nip/betterinvidious-invidious:arm64
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:3000:3000"
+    depends_on:
+      invidious-db:
+        condition: service_healthy
+        restart: true
+      companion:
+        condition: service_started
+    environment:
+      INVIDIOUS_CONFIG: |
+        db:
+          dbname: invidious
+          user: kemal
+          password: kemal
+          host: invidious-db
+          port: 5432
+        check_tables: true
+        login_enabled: true
+        registration_enabled: true
+        invidious_companion:
+          - private_url: "http://companion:8282/companion"
+        invidious_companion_key: "b2c3d4e5f6g7h8i9"
+        hmac_key: "a1b2c3d4e5f6g7h8"
+        external_port: 3000
+        domain: "invidious.popped.dev"
+        https_only: false
+    healthcheck:
+      test: wget -nv --tries=1 --spider http://127.0.0.1:3000/api/v1/stats || exit 1
+      interval: 30s
+      timeout: 5s
+      retries: 2
+    volumes:
+      - ./assets/react:/invidious/assets/react:ro
+
+  companion:
+    image: quay.io/invidious/invidious-companion:latest
+    restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      SERVER_SECRET_KEY: "b2c3d4e5f6g7h8i9"
+      PROXY: "http://host.docker.internal:3128"
+    cap_drop:
+      - ALL
+    read_only: true
+    volumes:
+      - companioncache:/var/tmp/youtubei.js:rw
+    security_opt:
+      - no-new-privileges:true
+
+  invidious-db:
+    image: docker.io/library/postgres:14
+    restart: unless-stopped
+    volumes:
+      - postgresdata:/var/lib/postgresql/data
+      - ./config/sql:/config/sql
+      - ./config/sql:/docker-entrypoint-initdb.d/config/sql
+      - ./docker/init-invidious-db.sh:/docker-entrypoint-initdb.d/init-invidious-db.sh
+    environment:
+      POSTGRES_DB: invidious
+      POSTGRES_USER: kemal
+      POSTGRES_PASSWORD: kemal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+
+volumes:
+  postgresdata:
+  companioncache:

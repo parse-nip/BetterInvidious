@@ -48,6 +48,25 @@ tinyproxy must listen on `0.0.0.0:3128` (see PROXY_VIA_PC.md).
 
 ## Step 3: On the Pi – start the stack
 
+### Option A: Build on your PC, transfer to Pi (recommended – saves 40+ min)
+
+On your **Windows PC**:
+
+```powershell
+.\scripts\build-for-pi.ps1
+```
+
+Then copy `invidious/invidious-arm64.tar` (or `.tar.gz`) to the Pi. On the **Pi**:
+
+```bash
+cd ~/BetterInvidious/invidious
+gunzip invidious-arm64.tar.gz   # if you transferred the .gz
+docker load -i invidious-arm64.tar
+docker compose -f docker-compose.pi-prebuilt.yml up -d
+```
+
+### Option B: Build directly on the Pi
+
 ```bash
 cd ~/BetterInvidious/invidious
 docker compose -f docker-compose.pi.yml up -d --build
